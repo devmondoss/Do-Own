@@ -1,4 +1,4 @@
-# Documentación — Semana 4 (Entregable 4) — Do-Own
+# Documentación — Semana 4 
 
 ## Aprendizajes y ajustes priorizados
 
