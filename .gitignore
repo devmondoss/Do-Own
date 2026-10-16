@@ -1,0 +1,18 @@
+# Dependencies, local builds and test output
+node_modules/
+.next/
+.vercel/
+out/
+test-results/
+playwright-report/
+*.tsbuildinfo
+*.log
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
