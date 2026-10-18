@@ -45,4 +45,4 @@ Do-Own valida con **un solo tipo de usuario**, definido en el Problem Brief: per
 **Criterio de éxito.** Una hipótesis se da por validada según su señal observable definida (ej. H3: 80% de registros completos sin abandono; H5: 80%+ conecta su billetera sin soporte). Una vez corridas las 5 sesiones, los patrones de fricción confirmados se priorizan en una matriz de impacto/esfuerzo (alto impacto + bajo esfuerzo se corrige antes del cierre; el resto se planea o se descarta) — ese es el único punto del proceso donde se usa esa matriz, y con datos reales de usuarios, no con supuestos del equipo.
 
 
-
+https://do-own.vercel.app/inicio
