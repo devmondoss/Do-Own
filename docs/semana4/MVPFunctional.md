@@ -1,6 +1,5 @@
-# Documentación — Semana 4 
-
-## Aprendizajes y ajustes priorizados
+ ## Aprendizajes y ajustes priorizados
+*(150–300 palabras)*
 
 El aprendizaje central de esta etapa fue de simplificación técnica: en el Entregable 3 el equipo decidió usar capacidades nativas de Stellar (transacciones con memo hash + reservas patrocinadas) en lugar de escribir un contrato propio en Soroban para el sello semanal de integridad. La Sesión 6 (Smart Contracts) confirmó que esa decisión fue correcta para el alcance del MVP: el caso de uso —anclar un comprobante verificable semanalmente— no requiere lógica programable personalizada, y construir un contrato propio habría agregado complejidad (Rust, compilación a WASM, deploy, mantenimiento) sin aportar valor adicional al usuario final. Esto dejó más tiempo del equipo para el front y la experiencia de registro, que es donde realmente se juega la adopción.
 
@@ -11,6 +10,7 @@ Queda pendiente para después del cierre: si el producto evoluciona hacia incent
 ---
 
 ## Riesgos y pendientes
+*(200–400 palabras)*
 
 **Riesgos de producto y adopción**
 El mayor riesgo sigue siendo de deseabilidad, no técnico: no hay todavía evidencia con usuarios reales de que las personas registren sus gastos y emociones de forma constante (H1) ni de que la recompensa, por sí sola, sostenga ese hábito más allá de la novedad inicial (H2). Ambas se resuelven con las 5 sesiones de validación ya planeadas, pero hasta no correrlas son supuestos, no hechos.
@@ -30,13 +30,27 @@ El presupuesto de recompensas podría no sostener el uso real del grupo si la fr
 ---
 
 ## Plan de validación con usuarios
+*(200–500 palabras)*
 
 Do-Own valida con **un solo tipo de usuario**, definido en el Problem Brief: personas de 25 a 49 años, económicamente activas, que saben qué deberían cambiar en cómo gastan, ahorran o pagan deudas, pero repiten el mismo patrón sin identificar qué lo dispara. La meta es **5 personas** de ese perfil — suficiente para detectar ~85% de los problemas de usabilidad según la curva estándar de pruebas con usuarios.
 
 **Qué se prueba.** Diez hipótesis organizadas en los tres riesgos que pide el bootcamp:
-- *Deseabilidad* (H1–H2): si la persona registra sus gastos y emociones de forma constante (racha de 7+ días), y si la recompensa sostiene ese hábito más allá del resultado financiero.
-- *Usabilidad* (H3–H8): si puede registrar un gasto en menos de un minuto sin ayuda, entender su "activo digital" sin conocimientos de blockchain, conectar su billetera sin soporte, entender qué firma, esperar la confirmación sin reintentar, y reconocer el hash como comprobante.
-- *Viabilidad* (H9–H10): si las recompensas se emiten sin fallos en testnet, y si el presupuesto de recompensas sostiene el uso real del grupo.
+
+*Deseabilidad*
+- **H1 — Constancia de registro.** Creemos que las personas de 25-49 años con estrés financiero registrarán sus decisiones de gasto y su emoción asociada de forma constante, porque hoy no tienen una forma sencilla de ver el patrón detrás de sus hábitos sin juicio ni fricción. Lo sabremos si mantienen una racha de al menos 7 días seguidos.
+- **H2 — La recompensa no es el único motivo.** Creemos que la recompensa en cripto sostiene la constancia más que el resultado financiero percibido, porque da una señal de avance inmediata. Lo sabremos si las personas mantienen su racha incluso en semanas donde registran principalmente Antojos (el mecanismo de observar sin juicio engancha, no solo el token).
+
+*Usabilidad*
+- **H3 — Registro rápido.** Creemos que las personas podrán registrar un gasto completo (monto, categoría, emoción) en menos de un minuto sin ayuda externa, porque el flujo evita pedir información financiera sensible y usa solo 3 categorías simples. Lo sabremos si el 80% de los registros se completan sin abandonar la pantalla a mitad de camino, y sin soporte manual del equipo.
+- **H4 — Activo digital comprensible.** Creemos que las personas entenderán qué es su "activo digital" sin conocimientos previos de blockchain, porque la cuenta Stellar Testnet y la reserva patrocinada quedan invisibles para ellas. Lo sabremos si pueden explicar con sus propias palabras qué tienen y cómo lo consiguieron.
+- **H5 — Conexión de billetera sin ayuda.** Creemos que una persona sin experiencia previa en cripto podrá conectar o crear su billetera sin ayuda externa, porque Do-Own guía el proceso paso a paso y no pide frases semilla ni claves privadas. Lo sabremos si el 80%+ de los usuarios completan ese paso sin pedir soporte.
+- **H6 — Entiende qué firma.** Creemos que la persona entenderá qué está aprobando cuando firma una transacción, porque Do-Own lo presenta en lenguaje simple, sin jerga de blockchain. Lo sabremos si, al preguntarle, puede explicar con sus propias palabras qué acaba de confirmar.
+- **H7 — Espera la confirmación sin reintentar.** Creemos que la persona esperará los ~5 segundos de confirmación en Stellar sin volver a tocar el botón, porque la interfaz muestra con claridad que la operación está en curso. Lo sabremos si no se registran transacciones duplicadas por reintentos durante la validación.
+- **H8 — El hash se entiende como comprobante.** Creemos que la persona entenderá el hash/comprobante como evidencia de que su registro quedó guardado, no como un código sin sentido, porque Do-Own lo presenta como "tu comprobante" y no como un dato técnico. Lo sabremos si, al mostrárselo, lo reconoce como prueba — no pregunta "¿y esto qué es?".
+
+*Viabilidad*
+- **H9 — Emisión de recompensas sin fallos.** Creemos que se puede emitir y verificar recompensas en Stellar Testnet para todo el grupo de prueba sin fallos de transacción, porque las reservas patrocinadas evitan que el usuario necesite XLM propio. Lo sabremos si el 100% de las recompensas otorgadas durante la validación se reflejan correctamente en el saldo del usuario, verificables en Stellar Expert.
+- **H10 — Presupuesto de recompensas sostenible.** Creemos que el presupuesto de recompensas puede sostener el uso real del grupo de prueba sin quedarse sin fondos, porque el modelo limita la recompensa a acciones validadas (no ilimitadas). Lo sabremos si, al cierre de la validación, el gasto en recompensas se mantiene dentro del presupuesto estimado por usuario.
 
 **Cómo se prueba.** Sesiones individuales de usabilidad (presenciales o por videollamada), con roles separados — un(a) moderador(a) que conduce la sesión con un guion fijo (bienvenida, 4 escenarios de tarea, preguntas de "pensar en voz alta", preguntas finales sobre comportamiento pasado, nunca sobre intenciones futuras) y un(a) observador(a) que solo anota, sin intervenir. Antes de gastar una sesión real, el equipo recorre el flujo internamente con una checklist de 4 preguntas por paso, para resolver fricciones obvias primero.
 
