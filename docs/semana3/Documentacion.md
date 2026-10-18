@@ -56,7 +56,7 @@ Do-Own usará capacidades nativas de Stellar en lugar de escribir un contrato pr
 | Adriana | AdrianaLhada | Methodology & Product Lead | Sí — contenido de la micro-lección de Antojos, mockups |
 | Anthony | devmondoss | Full Stack | Sí — presentación del proyecto e inicio de Info.md |
 | Elba | elba333 | Product & Business Lead | *(pendiente)* |
-| Nayeli | nayelicz | Backend | *(pendiente)* |
+| Nayeli | nayelicz | Backend | Sí - presentación de slides de las pantallas del MVP|
 | Rodrigo | rodyxdev | Backend | Sí — frontend ejecutable, adaptación al Blueprint y documentación de integración |
 
 ---
