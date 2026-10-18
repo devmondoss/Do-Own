@@ -1,5 +1,4 @@
  ## Aprendizajes y ajustes priorizados
-*(150–300 palabras)*
 
 El aprendizaje central de esta etapa fue de simplificación técnica: en el Entregable 3 el equipo decidió usar capacidades nativas de Stellar (transacciones con memo hash + reservas patrocinadas) en lugar de escribir un contrato propio en Soroban para el sello semanal de integridad. La Sesión 6 (Smart Contracts) confirmó que esa decisión fue correcta para el alcance del MVP: el caso de uso —anclar un comprobante verificable semanalmente— no requiere lógica programable personalizada, y construir un contrato propio habría agregado complejidad (Rust, compilación a WASM, deploy, mantenimiento) sin aportar valor adicional al usuario final. Esto dejó más tiempo del equipo para el front y la experiencia de registro, que es donde realmente se juega la adopción.
 
@@ -10,7 +9,6 @@ Queda pendiente para después del cierre: si el producto evoluciona hacia incent
 ---
 
 ## Riesgos y pendientes
-*(200–400 palabras)*
 
 **Riesgos de producto y adopción**
 El mayor riesgo sigue siendo de deseabilidad, no técnico: no hay todavía evidencia con usuarios reales de que las personas registren sus gastos y emociones de forma constante (H1) ni de que la recompensa, por sí sola, sostenga ese hábito más allá de la novedad inicial (H2). Ambas se resuelven con las 5 sesiones de validación ya planeadas, pero hasta no correrlas son supuestos, no hechos.
@@ -30,7 +28,6 @@ El presupuesto de recompensas podría no sostener el uso real del grupo si la fr
 ---
 
 ## Plan de validación con usuarios
-*(200–500 palabras)*
 
 Do-Own valida con **un solo tipo de usuario**, definido en el Problem Brief: personas de 25 a 49 años, económicamente activas, que saben qué deberían cambiar en cómo gastan, ahorran o pagan deudas, pero repiten el mismo patrón sin identificar qué lo dispara. La meta es **5 personas** de ese perfil — suficiente para detectar ~85% de los problemas de usabilidad según la curva estándar de pruebas con usuarios.
 
