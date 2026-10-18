@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 import { DemoProvider } from "@/providers/demo-provider";
+import { WalletProvider } from "@/providers/wallet-provider";
 import { PwaRegister } from "@/components/ui/pwa-register";
 
 export const metadata: Metadata = {
@@ -28,7 +29,9 @@ export default function RootLayout({
         <a className="skip-link" href="#contenido">
           Saltar al contenido
         </a>
-        <DemoProvider>{children}</DemoProvider>
+        <DemoProvider>
+          <WalletProvider>{children}</WalletProvider>
+        </DemoProvider>
         <PwaRegister />
       </body>
     </html>

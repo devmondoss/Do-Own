@@ -5,6 +5,8 @@ import Link from "next/link";
 import {
   ArrowRight,
   Check,
+  ExternalLink,
+  Loader2,
   CheckCircle2,
   Coins,
   Gift,
@@ -17,10 +19,15 @@ import {
 import { Badge, Button, ButtonLink } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { handleReclamar } from "@/lib/integrations";
+import { useWallet } from "@/providers/wallet-provider";
 
 export function RewardScreen() {
   const { data, claimDemoReward, notify } = useDemo();
+  const wallet = useWallet();
+  const live = wallet.enabled;
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const grant =
     data.rewards.find((reward) => reward.id === selectedId) ||
     data.rewards.find((reward) => reward.status === "available") ||
@@ -29,15 +36,34 @@ export function RewardScreen() {
   const next = data.rewards.find(
     (reward) => reward.status === "available" && reward.id !== grant?.id,
   );
-  function claim() {
-    if (!grant || claimed) return;
+  const receipt = grant ? wallet.rewardReceipts[grant.id] : undefined;
+  async function claim() {
+    if (!grant || claimed || busy) return;
     setSelectedId(grant.id);
     handleReclamar(grant.id);
-    // DEMO(UI): memory-only balance. TODO(STELLAR): await confirmed receipt.
-    claimDemoReward(grant.id);
-    notify(
-      "Sumaste una recompensa de demostración. No se realizó una transferencia real.",
-    );
+    if (!live) {
+      // DEMO(UI): memory-only balance when the server has no network config.
+      claimDemoReward(grant.id);
+      notify(
+        "Sumaste una recompensa de demostración. No se realizó una transferencia real.",
+      );
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      // Server pays 1 DOWN with an idempotent memo hash; we wait for the
+      // confirmed transaction before marking the reward as received.
+      await wallet.claim(grant.id);
+      claimDemoReward(grant.id);
+      notify("¡Listo! Tu recompensa ya está en tu cuenta digital.");
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "No pudimos entregar tu recompensa.",
+      );
+    } finally {
+      setBusy(false);
+    }
   }
   return (
     <main id="contenido" className="flow-page reward-page">
@@ -53,7 +79,7 @@ export function RewardScreen() {
           <Leaf size={19} />
           Do-Own
         </Link>
-        <Badge tone="neutral">Demo</Badge>
+        <Badge tone="neutral">{live ? "Prueba" : "Demo"}</Badge>
       </header>
       <div className="reward-main">
         <div className="reward-celebration">
@@ -114,16 +140,18 @@ export function RewardScreen() {
                 {!grant
                   ? "POR CADA PASO"
                   : claimed
-                    ? "SUMASTE EN LA DEMO"
+                    ? live
+                      ? "YA ESTÁ EN TU CUENTA"
+                      : "SUMASTE EN LA DEMO"
                     : "TU ACCIÓN SUMA"}
               </span>
               <span className="network-badge">
                 <i />
-                Recompensa de ejemplo
+                {live ? "Activo digital de prueba" : "Recompensa de ejemplo"}
               </span>
             </div>
             <div className="reward-value">
-              1 crédito
+              {live ? "1 DOWN" : "1 crédito"}
               <span>
                 <Coins size={29} />
               </span>
@@ -133,7 +161,9 @@ export function RewardScreen() {
             {[
               "Una recompensa por registrar tu decisión.",
               "Otra al completar la microlección.",
-              "Disponible en tu cuenta de demostración.",
+              live
+                ? "Llega a tu cuenta digital y es tuya."
+                : "Disponible en tu cuenta de demostración.",
             ].map((text) => (
               <div key={text}>
                 <span>
@@ -143,10 +173,43 @@ export function RewardScreen() {
               </div>
             ))}
           </div>
+          {error && (
+            <p className="field-error" role="alert">
+              {error}
+            </p>
+          )}
+          {live && receipt && (
+            <details className="technical-details">
+              <summary>Ver comprobante de la entrega</summary>
+              <p className="field-hint">
+                Operación confirmada en Stellar Testnet. Cualquiera puede
+                verificarla en el explorador público.
+              </p>
+              <a
+                className="text-link"
+                href={receipt.explorerUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {receipt.transactionHash.slice(0, 10)}…
+                <ExternalLink size={15} />
+              </a>
+            </details>
+          )}
           <p className="reward-demo-note">
-            Los créditos son unidades de demostración.
-            <br />
-            No representan dinero real ni un activo emitido.
+            {live ? (
+              <>
+                DOWN es un activo de prueba sin valor en dinero.
+                <br />
+                Sirve para ver y mover tu progreso.
+              </>
+            ) : (
+              <>
+                Los créditos son unidades de demostración.
+                <br />
+                No representan dinero real ni un activo emitido.
+              </>
+            )}
           </p>
         </div>
       </div>
@@ -168,7 +231,7 @@ export function RewardScreen() {
         ) : claimed ? (
           <>
             <Button disabled className="full-width">
-              Recompensa demo reclamada
+              {live ? "Recompensa recibida" : "Recompensa demo reclamada"}
               <CheckCircle2 size={19} />
             </Button>
             {next && (
@@ -202,9 +265,23 @@ export function RewardScreen() {
           </>
         ) : (
           <>
-            <Button onClick={claim} className="full-width">
-              Recibir mi recompensa
-              <ArrowRight size={19} />
+            <Button
+              onClick={claim}
+              className="full-width"
+              disabled={busy}
+              aria-busy={busy}
+            >
+              {busy ? (
+                <>
+                  Enviando a tu cuenta…
+                  <Loader2 size={19} className="spin" />
+                </>
+              ) : (
+                <>
+                  Recibir mi recompensa
+                  <ArrowRight size={19} />
+                </>
+              )}
             </Button>
             <Link href="/inicio" className="later-link">
               Hacerlo más tarde

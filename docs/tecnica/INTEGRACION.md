@@ -107,3 +107,54 @@ La carpeta `.vercel/`, `.env*`, `node_modules/`, `.next/` y los reportes no se i
 La instalación independiente y la compilación de `frontend/` se verificaron con Node 24. `npm audit --omit=dev` no reportó vulnerabilidades. Se retiró la dependencia directa de desarrollo `sharp`, usada únicamente por un generador local de recursos que no forma parte del entregable; Next mantiene su dependencia propia `sharp@0.35.5`.
 
 La auditoría completa conserva cinco avisos altos derivados de una misma dependencia de desarrollo: `braces@3.0.3`, a través de `micromatch` → `fast-glob` → `@next/eslint-plugin-next` → `eslint-config-next`. El [aviso revisado de GitHub](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) no registra una versión corregida. No se aplicó `npm audit fix --force`, porque propone cambiar la versión mayor de la configuración de Next. Revisar una actualización compatible cuando exista. La herramienta procesa patrones del proyecto durante el lint; no recibe los formularios ni fotografías de los usuarios.
+
+## Stellar Testnet (Semana 4)
+
+Esta sección reemplaza los marcadores `TODO(STELLAR)` de recompensas, cuenta, envío y comprobante. Ya se instaló `@stellar/stellar-sdk` y existen endpoints reales. Si el servidor no tiene variables de entorno, `/api/stellar/config` responde `enabled: false` y la UI vuelve al modo demo, que es como corren las pruebas e2e.
+
+### Piezas
+
+| Archivo | Qué hace |
+|---|---|
+| `src/lib/stellar/config.ts` | Red, Horizon, explorador y activo `DOWN` (no secretos) |
+| `src/lib/stellar/server.ts` | Solo servidor: onboarding patrocinado, pago de recompensas idempotente y fee bump con lista blanca |
+| `src/lib/stellar/client.ts` | Navegador: llave en el dispositivo, firma, compromisos con sal, raíz Merkle y verificación |
+| `src/providers/wallet-provider.tsx` | Estado de la wallet (`disabled` / `none` / `creating` / `ready` / `error`) |
+| `src/app/api/stellar/{config,onboard,reward,sponsor}` | Route handlers de Next (corren como funciones en Vercel) |
+| `src/components/features/wallet-account.tsx` | `/cuenta` real: saldo DOWN, recibir, enviar, movimientos, respaldo y recuperación |
+| `src/components/features/verify-screen.tsx` | `/verificar`: página pública de verificación |
+
+### Endpoints
+
+- `GET /api/stellar/config`: indica si la integración está activa y devuelve el activo y el patrocinador.
+- `POST /api/stellar/onboard {publicKey}`: devuelve una transacción ya firmada por el patrocinador (crear cuenta + trustline con reservas patrocinadas). El dispositivo agrega su firma y la envía a Horizon. Si la cuenta ya existe, responde `{status:"ready"}`.
+- `POST /api/stellar/reward {publicKey, rewardId}`: paga 1 DOWN con memo `sha256("do-own:reward:v1:<cuenta>:<rewardId>")`. Si encuentra ese memo en el historial, devuelve la transacción existente sin volver a pagar. El límite es de 12 recompensas por cuenta por día.
+- `POST /api/stellar/sponsor {xdr, kind}`: envuelve en fee bump y envía la transacción firmada por la persona. Solo acepta dos formas: `seal` (una `bumpSequence` a 0 con memo hash) y `transfer` (un pago de DOWN). Verifica la firma y que la cuenta tenga trustline a DOWN.
+
+### Sello semanal
+
+`compromiso = sha256(sal16 ‖ JSON["do-own:record:v1", id, createdAt, amount, currency, category, emotion, note])`. La raíz es un árbol de Merkle binario sobre los compromisos (el nodo impar sube). La raíz (32 bytes) va en `Memo.hash`. Solo se guardan en `localStorage` la llave, los hashes de los sellos y los recibos de recompensa; nunca montos ni notas. Las sales se conservan en memoria durante la sesión para que "Verificar ahora" pueda recomputar la raíz.
+
+### Configurar sin instalar nada (desde el navegador)
+
+1. En Vercel → Settings → Environment Variables, agregar `STELLAR_SPONSOR_SECRET`, `STELLAR_ASSET_ISSUER`, `STELLAR_ISSUER_SECRET` y `STELLAR_ADMIN_TOKEN`, y volver a desplegar.
+2. Abrir `https://do-own.vercel.app/api/stellar/admin?token=<TOKEN>&action=setup`. Fondea las cuentas con Friendbot, crea la trustline y emite DOWN. Se puede repetir sin problema.
+3. Abrir `https://do-own.vercel.app/api/stellar/admin?token=<TOKEN>&action=evidence`. Recorre el flujo completo con dos usuarios de prueba y devuelve el Markdown para `docs/semana4/EvidenciaTestnet.md`.
+
+### Configurar con Node (alternativa local)
+
+```sh
+cd frontend
+npm ci
+npm run stellar:setup      # crea emisor + patrocinador en testnet y escribe .env.local
+npm run dev                # en otra terminal:
+npm run stellar:evidence   # recorre el flujo y escribe docs/semana4/EvidenciaTestnet.md
+```
+
+En Vercel (proyecto `do-own`), en **Settings → Environment Variables**, agregar `STELLAR_SPONSOR_SECRET` y `STELLAR_ASSET_ISSUER` con los valores que imprime `stellar:setup`, y volver a desplegar. Después se puede correr `npm run stellar:evidence -- https://do-own.vercel.app` para generar la evidencia contra producción.
+
+`STELLAR_SPONSOR_SECRET` es la llave de la tesorería de testnet: solo va en el servidor, nunca en `NEXT_PUBLIC_*` ni en Git (`.env.local` está ignorado).
+
+### Pendiente
+
+Falta la sesión autenticada y una base de datos para validar en el servidor que cada `rewardId` corresponde a un registro real. También faltan rate limiting por IP en `/sponsor`, cifrar la llave local con PIN o passkey, y la página del patrocinador con cifras agregadas.
