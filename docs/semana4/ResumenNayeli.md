@@ -1,4 +1,6 @@
-# Resumen de trabajo — Semana 4 · Nayeli Chávez (@nayelicz)
+# Resumen de trabajo — Semana 4 ·
+
+Backend & Integración - Nayeli Chávez 
 
 Contribución al Entregable 4 (MVP funcional) de Do-Own: integración de la wallet con Stellar Testnet, evidencia verificable y app instalable en el teléfono.
 
