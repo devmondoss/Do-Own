@@ -133,3 +133,13 @@ Demo: [do-own.vercel.app](https://do-own.vercel.app). Mapa del frontend: [FRONTE
 ## Wallet y Stellar Testnet — Semana 4
 
 La app incluye una wallet integrada y no custodial: la llave se genera en el dispositivo y la cuenta se crea con reservas patrocinadas, así que la persona no necesita XLM. Las recompensas se pagan en el activo de prueba **DOWN**, el sello semanal se ancla como memo hash con comisión pagada por Do-Own (fee bump) y existe una página pública de verificación en `/verificar`. La app se puede instalar en el teléfono como PWA. Configuración y endpoints: [INTEGRACION.md → Stellar Testnet](docs/tecnica/INTEGRACION.md#stellar-testnet-semana-4). Evidencia: [docs/semana4/MVPFunctional.md](docs/semana4/MVPFunctional.md).
+
+## App para Android
+
+Do-Own es una PWA: se puede instalar desde el navegador ("Agregar a pantalla de inicio") o como app de Android.
+
+- **Generar el instalador (.apk):** abrir el [reporte de PWABuilder](https://pwabuilder.com/reportcard?site=https://do-own-six.vercel.app), presionar **Package for stores**, luego **Android** y luego **Generate**. Se descarga un .zip con el `.apk` (para instalar directo en el teléfono) y el `.aab` (para Google Play).
+- **Instalar en el teléfono:** pasar el `.apk` al teléfono, abrirlo y permitir "instalar apps de origen desconocido" cuando Android lo pida.
+- **Pantalla completa:** el .zip incluye `assetlinks.json`. Debe copiarse a `frontend/public/.well-known/assetlinks.json` para que la app abra sin la barra del navegador.
+- **iPhone:** en Safari, **Compartir** y luego **Agregar a pantalla de inicio**.
+

@@ -5,6 +5,7 @@
 | Qué | Enlace |
 |---|---|
 | Producto en línea con wallet en testnet (PWA instalable en el teléfono) | [do-own-six.vercel.app](https://do-own-six.vercel.app/bienvenida) |
+| App para Android (generador del instalador en PWABuilder) | [Reporte y descarga](https://pwabuilder.com/reportcard?site=https://do-own-six.vercel.app) |
 | Demo anterior (Semana 3, sin red) | [do-own.vercel.app](https://do-own.vercel.app/bienvenida) |
 | Video del producto + pitch (máx. 3 min) | _PENDIENTE: pegar enlace público de YouTube_ |
 | Publicación en redes (bono, opcional) | _PENDIENTE_ |
