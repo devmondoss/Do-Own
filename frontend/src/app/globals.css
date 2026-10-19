@@ -4018,3 +4018,8 @@ button:disabled {
 .avatar-reset {
   margin-top: 16px;
 }
+
+.is-missed .day-circle {
+  background: #ece9f3;
+  box-shadow: inset 0 0 0 1.5px #d9d3e6;
+}

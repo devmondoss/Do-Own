@@ -30,7 +30,12 @@ export default function RootLayout({
         <a className="skip-link" href="#contenido">
           Saltar al contenido
         </a>
-        <DemoProvider>
+        <DemoProvider
+          live={
+            !!process.env.STELLAR_SPONSOR_SECRET &&
+            !!process.env.STELLAR_ASSET_ISSUER
+          }
+        >
           <WalletProvider>
             <AvatarProvider>{children}</AvatarProvider>
           </WalletProvider>

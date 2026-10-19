@@ -78,7 +78,7 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const [panel, setPanel] = useState<"notifications" | "profile" | null>(null);
-  const { data } = useDemo();
+  const { data, live } = useDemo();
   const avatar = useAvatar();
   return (
     <div className={cn("app-layout", focused && "app-layout-focused")}>
@@ -100,9 +100,11 @@ export function AppShell({
             <strong>a tu propio ritmo.</strong>
           </p>
         </div>
-        <span className="demo-caption">
-          <span /> Experiencia de demostración
-        </span>
+        {!live && (
+          <span className="demo-caption">
+            <span /> Experiencia de demostración
+          </span>
+        )}
       </aside>
       <div className="app-main">
         <header
@@ -110,7 +112,7 @@ export function AppShell({
         >
           <Brand />
           <div className="top-actions">
-            <span className="demo-label">Demo</span>
+            {!live && <span className="demo-label">Demo</span>}
             <button
               className="notification-button icon-button"
               aria-label="Notificaciones"
@@ -124,7 +126,7 @@ export function AppShell({
             </button>
             <button
               className="avatar-button"
-              aria-label={`Ver perfil de ${data.profile.name}`}
+              aria-label={`Ver perfil de ${data.profile.name || "usuario"}`}
               aria-expanded={panel === "profile"}
               onClick={() => setPanel(panel === "profile" ? null : "profile")}
             >
@@ -162,11 +164,13 @@ export function AppShell({
               <>
                 <span className="eyebrow">MI PERFIL</span>
                 <h2>
-                  {data.profile.name} · Nivel {data.profile.level}
+                  {data.profile.name || "Tu perfil"} · Nivel{" "}
+                  {data.profile.level}
                 </h2>
                 <p>
-                  Tu progreso es tuyo. Llevas {data.streakDays} días
-                  construyendo buenos hábitos.
+                  {data.streakDays > 0
+                    ? `Tu progreso es tuyo. Llevas ${data.streakDays} ${data.streakDays === 1 ? "día" : "días"} construyendo buenos hábitos.`
+                    : "Tu progreso es tuyo. Registra tu primera decisión para empezar tu racha."}
                 </p>
                 <button
                   className="text-link"
@@ -178,7 +182,9 @@ export function AppShell({
                   <Camera size={16} />
                   Cambiar foto de perfil
                 </button>
-                <span className="demo-caption">Perfil de demostración</span>
+                {!live && (
+                  <span className="demo-caption">Perfil de demostración</span>
+                )}
               </>
             )}
           </div>

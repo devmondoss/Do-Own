@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { useAvatar } from "@/providers/avatar-provider";
-import type { DailyAction } from "@/types/do-own";
+import type { DailyAction, DecisionRecord } from "@/types/do-own";
+import { decisionDate } from "@/lib/decision-summary";
 
 const actions = [
   {
@@ -56,7 +57,8 @@ const actions = [
 ];
 
 export function HomeScreen() {
-  const { data } = useDemo();
+  const { data, live } = useDemo();
+  const week = live ? currentWeek(data.decisions) : null;
   const avatar = useAvatar();
   const completed = data.completedActions.length;
   return (
@@ -88,7 +90,9 @@ export function HomeScreen() {
                 </span>
               </button>
               <div>
-                <h1>Hola, {data.profile.name}</h1>
+                <h1>
+                  {data.profile.name ? `Hola, ${data.profile.name}` : "¡Hola!"}
+                </h1>
                 <p>
                   Tu progreso es tuyo <span aria-hidden="true">⭐</span>
                 </p>
@@ -96,32 +100,38 @@ export function HomeScreen() {
             </div>
             <Badge tone="amber">
               <Flame size={15} />
-              {data.streakDays} días
+              {data.streakDays} {data.streakDays === 1 ? "día" : "días"}
             </Badge>
           </div>
           <div className="week-panel">
             <div className="week-heading">
               <span>Racha de la semana</span>
-              <strong>4/7 completados</strong>
+              <strong>{week ? `${week.done}/7` : "4/7"} completados</strong>
             </div>
             <div className="week-days">
-              {["L", "M", "M", "J", "V", "S", "D"].map((day, index) => (
-                <div
-                  className={`week-day ${index === 4 ? "is-today" : ""} ${index > 4 ? "is-future" : ""}`}
-                  key={index}
-                >
-                  <span>{day}</span>
-                  <span className="day-circle">
-                    {index < 4 ? (
-                      <Check size={18} aria-label="Completado" />
-                    ) : index === 4 ? (
-                      "Hoy"
-                    ) : (
-                      <LockKeyhole size={14} aria-label="Próximo día" />
-                    )}
-                  </span>
-                </div>
-              ))}
+              {["L", "M", "M", "J", "V", "S", "D"].map((day, index) => {
+                const today = week ? week.today : 4;
+                const done = week ? week.days[index] : index < 4;
+                return (
+                  <div
+                    className={`week-day ${index === today ? "is-today" : ""} ${index > today ? "is-future" : ""} ${index < today && !done ? "is-missed" : ""}`}
+                    key={index}
+                  >
+                    <span>{day}</span>
+                    <span className="day-circle">
+                      {done ? (
+                        <Check size={18} aria-label="Completado" />
+                      ) : index === today ? (
+                        "Hoy"
+                      ) : index > today ? (
+                        <LockKeyhole size={14} aria-label="Próximo día" />
+                      ) : (
+                        <span aria-label="Sin registro" />
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </Card>
@@ -192,4 +202,18 @@ export function HomeScreen() {
       </div>
     </main>
   );
+}
+
+/** Monday-to-Sunday view of the current week (Mexico City calendar). */
+function currentWeek(decisions: DecisionRecord[]) {
+  const todayStr = decisionDate(new Date().toISOString());
+  const todayNoon = Date.parse(`${todayStr}T12:00:00Z`);
+  const today = (new Date(todayNoon).getUTCDay() + 6) % 7;
+  const recorded = new Set(decisions.map((d) => decisionDate(d.createdAt)));
+  const days = Array.from({ length: 7 }, (_, i) =>
+    recorded.has(
+      new Date(todayNoon + (i - today) * 86400000).toISOString().slice(0, 10),
+    ),
+  );
+  return { today, days, done: days.filter(Boolean).length };
 }
