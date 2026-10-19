@@ -129,3 +129,7 @@ npm start
 ```
 
 Demo: [do-own.vercel.app](https://do-own.vercel.app). Mapa del frontend: [FRONTEND.md](docs/tecnica/FRONTEND.md). Conexión con backend y Stellar: [INTEGRACION.md](docs/tecnica/INTEGRACION.md). Contexto del proyecto y equipo: [PROYECTO.md](docs/PROYECTO.md).
+
+## Wallet y Stellar Testnet — Semana 4
+
+La app incluye una wallet integrada y no custodial: la llave se genera en el dispositivo y la cuenta se crea con reservas patrocinadas, así que la persona no necesita XLM. Las recompensas se pagan en el activo de prueba **DOWN**, el sello semanal se ancla como memo hash con comisión pagada por Do-Own (fee bump) y existe una página pública de verificación en `/verificar`. La app se puede instalar en el teléfono como PWA. Configuración y endpoints: [INTEGRACION.md → Stellar Testnet](docs/tecnica/INTEGRACION.md#stellar-testnet-semana-4). Evidencia: [docs/semana4/MVPFunctional.md](docs/semana4/MVPFunctional.md).

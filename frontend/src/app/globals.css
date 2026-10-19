@@ -3846,3 +3846,66 @@ button:disabled {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ---- Wallet / Stellar integration (Semana 4) ---- */
+@keyframes do-own-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin {
+  animation: do-own-spin 0.9s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation-duration: 2.4s;
+  }
+}
+.wallet-key {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+}
+.technical-details a.text-link {
+  margin: 0.35rem 0;
+}
+.seal-card {
+  display: grid;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+.seal-card h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.1rem;
+}
+.seal-card p {
+  margin: 0;
+}
+.install-card {
+  display: grid;
+  gap: 0.6rem;
+}
+.verify-body {
+  display: grid;
+  gap: 1.25rem;
+  width: min(100%, 34rem);
+  margin: 1.5rem auto 3rem;
+  padding: 0 1rem;
+}
+.verify-body h1 {
+  margin: 0;
+}
+.verify-card {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: start;
+}
+.verify-card h2,
+.verify-card p {
+  margin: 0;
+}
+.verify-card .transfer-summary {
+  width: 100%;
+}

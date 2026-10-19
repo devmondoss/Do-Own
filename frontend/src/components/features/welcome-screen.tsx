@@ -14,23 +14,30 @@ import {
 import { Badge, Brand, Button, IconTile } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { handleCrearPerfil } from "@/lib/integrations";
+import { useWallet } from "@/providers/wallet-provider";
 
 export function WelcomeScreen() {
   const [name, setName] = useState("");
   const { startDemo } = useDemo();
+  const { enabled, ensureAccount } = useWallet();
   const router = useRouter();
   function start(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     handleCrearPerfil();
     // DEMO(UI): no real account or authentication is created.
     startDemo(name);
+    // Creates the device key and the sponsored account in the background,
+    // so the first reward can be delivered without waiting here.
+    if (enabled) void ensureAccount();
     router.push("/inicio");
   }
   return (
     <main id="contenido" className="welcome-page">
       <header>
         <Brand />
-        <Badge tone="neutral">Demo interactiva</Badge>
+        <Badge tone="neutral">
+          {enabled ? "Versión de prueba" : "Demo interactiva"}
+        </Badge>
       </header>
       <div className="welcome-layout">
         <section className="welcome-hero">
@@ -93,8 +100,9 @@ export function WelcomeScreen() {
           </form>
           <p className="welcome-privacy">
             <ShieldCheck size={17} />
-            No necesitas datos financieros sensibles. Esta demo guarda los
-            cambios solo durante la sesión y se reinicia al recargar.
+            {enabled
+              ? "No necesitas datos financieros sensibles. Tu cuenta digital se crea en este dispositivo, sin contraseñas ni costos."
+              : "No necesitas datos financieros sensibles. Esta demo guarda los cambios solo durante la sesión y se reinicia al recargar."}
           </p>
         </section>
       </div>

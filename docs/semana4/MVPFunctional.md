@@ -1,4 +1,37 @@
- ## Aprendizajes y ajustes priorizados
+# MVP Functional — Semana 4 (Entregable 4) — Do-Own
+
+## Evidencia verificable
+
+| Qué | Enlace |
+|---|---|
+| Producto en línea (PWA instalable en el teléfono) | [do-own.vercel.app](https://do-own.vercel.app/bienvenida) |
+| Video del producto + pitch (máx. 3 min) | _PENDIENTE: pegar enlace público de YouTube_ |
+| Publicación en redes (bono, opcional) | _PENDIENTE_ |
+| Transacciones en Stellar Testnet (explorador público) | [EvidenciaTestnet.md](./EvidenciaTestnet.md) |
+| Código de la integración | [`frontend/src/lib/stellar/`](../../frontend/src/lib/stellar/) y [`frontend/src/app/api/stellar/`](../../frontend/src/app/api/stellar/) |
+
+Tecnología declarada en el Entregable 3: **opción B — solución existente del ecosistema** (capacidades nativas de Stellar: memo hash y reservas patrocinadas, sin contrato Soroban propio). Esta semana quedó integrada en el front y funcionando en testnet.
+
+## Qué se construyó esta semana
+
+**Wallet integrada (no custodial).** Al empezar el recorrido, la app genera la llave de la persona en su propio dispositivo. No pide frase semilla, extensión ni XLM. El servidor de Do-Own nunca recibe esa llave.
+
+| Paso del producto | Capacidad de Stellar | Dónde está en el código |
+|---|---|---|
+| Crear la cuenta digital con saldo 0 XLM | **Reservas patrocinadas**: `beginSponsoringFutureReserves` + `createAccount` + `changeTrust` a DOWN + `endSponsoringFutureReserves`. Firman Do-Own (patrocinador) y la persona | `POST /api/stellar/onboard` · `client.ts → onboard` |
+| Recibir recompensa por registro o microlección | Pago de **DOWN** (activo de prueba sin valor en dinero) con **memo hash** determinista: si se reintenta, no se paga dos veces | `POST /api/stellar/reward` |
+| Sellar la semana | Cada registro se convierte en `sha256(sal ‖ registro)`, con un árbol de Merkle de la semana. La raíz va como **memo hash** en una transacción firmada por la persona, y Do-Own paga la comisión con **fee bump** | `POST /api/stellar/sponsor` (kind `seal`) · `/comprobante` |
+| Verificar sin ver datos | Página pública que lee la transacción en la red y compara su memo con la raíz | `/verificar?tx=…&root=…` |
+| Enviar DOWN a otra persona | Pago firmado por la persona, con comisión cubierta por fee bump | `POST /api/stellar/sponsor` (kind `transfer`) · `/cuenta` |
+| Llevarla en el teléfono | PWA instalable ("Agregar a pantalla de inicio"), con tarjeta de instalación en `/cuenta` | `manifest.ts`, `sw.js`, `install-card.tsx` |
+
+Montos, categorías, notas y emociones **nunca salen del dispositivo ni llegan a Stellar**: solo se publican hashes. El servidor solo acepta patrocinar comisiones de dos formas de transacción (sello y envío de DOWN), para que nadie pueda usar la tesorería en otra cosa. Si el servidor no tiene variables de Stellar, la app sigue funcionando como demo.
+
+Cómo reproducir: [docs/tecnica/INTEGRACION.md → Stellar Testnet](../tecnica/INTEGRACION.md#stellar-testnet-semana-4).
+
+---
+
+## Aprendizajes y ajustes priorizados
 
 El aprendizaje central de esta etapa fue de simplificación técnica: en el Entregable 3 el equipo decidió usar capacidades nativas de Stellar (transacciones con memo hash + reservas patrocinadas) en lugar de escribir un contrato propio en Soroban para el sello semanal de integridad. La Sesión 6 (Smart Contracts) confirmó que esa decisión fue correcta para el alcance del MVP: el caso de uso —anclar un comprobante verificable semanalmente— no requiere lógica programable personalizada, y construir un contrato propio habría agregado complejidad (Rust, compilación a WASM, deploy, mantenimiento) sin aportar valor adicional al usuario final. Esto dejó más tiempo del equipo para el front y la experiencia de registro, que es donde realmente se juega la adopción.
 
@@ -17,7 +50,7 @@ El mayor riesgo sigue siendo de deseabilidad, no técnico: no hay todavía evide
 Dos de las cinco partes del modelo de go-to-market siguen sin resolver: el canal de adquisición real (más allá de candidatos como la comunidad del bootcamp) y el modelo de sostenibilidad económico, que depende de que empresas y patrocinadores financien las recompensas (B2B2C). Sin esas dos decisiones, el producto puede funcionar técnicamente pero no tiene aún un camino claro para crecer más allá del grupo de prueba.
 
 **Riesgos técnicos**
-El presupuesto de recompensas podría no sostener el uso real del grupo si la frecuencia de registro supera lo estimado (H10) — esto se mide recién al cierre de la validación, no antes. También existe el riesgo de fricción en la firma de transacciones: si la persona no entiende qué está aprobando (H6) o reintenta el botón antes de que confirme la red (H7), eso se traduce en una mala primera impresión aunque el backend funcione correctamente.
+El presupuesto de recompensas podría no sostener el uso real del grupo si la frecuencia de registro supera lo estimado (H10) — esto se mide recién al cierre de la validación, no antes. También existe el riesgo de fricción en la firma de transacciones: si la persona no entiende qué está aprobando (H6) o reintenta el botón antes de que confirme la red (H7), eso se traduce en una mala primera impresión aunque el backend funcione correctamente. La llave de la wallet vive en el navegador del dispositivo: si la persona borra los datos sin haber guardado su clave de respaldo, pierde el acceso a esa cuenta. Además, mientras no exista base de datos ni sesión, el servidor limita las recompensas por día y evita pagos duplicados, pero todavía no comprueba que cada registro sea real.
 
 **Pendientes antes del cierre**
 - Ejecutar las 5 sesiones de validación con usuarios reales del perfil definido en el Problem Brief.
@@ -54,6 +87,3 @@ Do-Own valida con **un solo tipo de usuario**, definido en el Problem Brief: per
 **Cómo se ordena la evidencia.** Cada sesión deja una ficha de observación (qué hizo, qué dijo, en qué paso) y un resumen de fricciones por tarea. Con las 5 sesiones completas, las fricciones se agrupan en un mapa de afinidad para identificar patrones reales — una fricción que se repite en 3 de 5 personas es prioridad; un caso aislado no lo es.
 
 **Criterio de éxito.** Una hipótesis se da por validada según su señal observable definida (ej. H3: 80% de registros completos sin abandono; H5: 80%+ conecta su billetera sin soporte). Una vez corridas las 5 sesiones, los patrones de fricción confirmados se priorizan en una matriz de impacto/esfuerzo (alto impacto + bajo esfuerzo se corrige antes del cierre; el resto se planea o se descarta) — ese es el único punto del proceso donde se usa esa matriz, y con datos reales de usuarios, no con supuestos del equipo.
-
-
-https://do-own.vercel.app/inicio

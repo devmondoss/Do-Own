@@ -24,8 +24,15 @@ import {
 import { useDemo } from "@/providers/demo-provider";
 import { handleTransferirRecompensa } from "@/lib/integrations";
 import type { TransferInput } from "@/types/do-own";
+import { useWallet } from "@/providers/wallet-provider";
+import { WalletAccount } from "./wallet-account";
 
 export function AccountScreen() {
+  const { enabled } = useWallet();
+  return enabled ? <WalletAccount /> : <DemoAccountScreen />;
+}
+
+function DemoAccountScreen() {
   const { data, transferDemo, notify } = useDemo();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");

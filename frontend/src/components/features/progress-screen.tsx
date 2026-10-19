@@ -27,10 +27,12 @@ import {
   SectionHeading,
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
+import { formatDown, useWallet } from "@/providers/wallet-provider";
 import { decisionWeekday, recentDecisions } from "@/lib/decision-summary";
 
 export function ProgressScreen() {
   const { data } = useDemo();
+  const wallet = useWallet();
   const [tab, setTab] = useState<"history" | "earn">("history");
   const [showAll, setShowAll] = useState(false);
   const pending = data.rewards.filter(
@@ -63,7 +65,7 @@ export function ProgressScreen() {
         <div className="balance-meta">
           <span className="network-badge">
             <i />
-            Cuenta de demostración
+            {wallet.enabled ? "Tu cuenta digital" : "Cuenta de demostración"}
           </span>
           <Link
             href="/cuenta"
@@ -75,13 +77,13 @@ export function ProgressScreen() {
         </div>
         <p>Tu saldo en recompensas</p>
         <div className="balance-number">
-          {data.balanceUnits}
-          <span>créditos</span>
+          {wallet.enabled ? formatDown(wallet.balance) : data.balanceUnits}
+          <span>{wallet.enabled ? "DOWN" : "créditos"}</span>
         </div>
         <div className="balance-footer">
           <span>
             <BadgeCheck size={15} />
-            Saldo de ejemplo
+            {wallet.enabled ? "Activo de prueba" : "Saldo de ejemplo"}
           </span>
           <button onClick={() => setTab("earn")}>
             Cómo ganar

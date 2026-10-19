@@ -11,10 +11,13 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "format": "prettier --write src tests *.ts *.mjs package.json tsconfig.json",
-    "format:check": "prettier --check src tests *.ts *.mjs package.json tsconfig.json"
+    "format:check": "prettier --check src tests *.ts *.mjs package.json tsconfig.json",
+    "stellar:setup": "node scripts/stellar-setup.mjs",
+    "stellar:evidence": "node scripts/stellar-evidence.mjs"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
+    "@stellar/stellar-sdk": "^17.2.1",
     "lucide-react": "^0.577.0",
     "next": "16.4.2",
     "react": "19.3.1",
