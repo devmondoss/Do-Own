@@ -155,6 +155,6 @@ En Vercel (proyecto `do-own`), en **Settings → Environment Variables**, agrega
 
 `STELLAR_SPONSOR_SECRET` es la llave de la tesorería de testnet: solo va en el servidor, nunca en `NEXT_PUBLIC_*` ni en Git (`.env.local` está ignorado).
 
-### Pendiente
+### Después del bootcamp
 
 Falta la sesión autenticada y una base de datos para validar en el servidor que cada `rewardId` corresponde a un registro real. También faltan rate limiting por IP en `/sponsor`, cifrar la llave local con PIN o passkey, y la página del patrocinador con cifras agregadas.
