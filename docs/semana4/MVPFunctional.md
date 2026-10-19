@@ -6,6 +6,7 @@
 |---|---|
 | Producto en línea con wallet en testnet (PWA instalable en el teléfono) | [do-own-six.vercel.app](https://do-own-six.vercel.app/bienvenida) |
 | App para Android (generador del instalador en PWABuilder) | [Reporte y descarga](https://pwabuilder.com/reportcard?site=https://do-own-six.vercel.app) |
+| App para Android: descarga del paquete (.apk / .aab) | [Descargar paquete Android](https://pwabuilder.com/google-play-packaging-status?jobId=googleplaypackagejob%3Ado-own-six.vercel.app%3Ae42d899b-b9ae-4b99-a3e3-f0cbbe1a838c) |
 | Demo anterior (Semana 3, sin red) | [do-own.vercel.app](https://do-own.vercel.app/bienvenida) |
 | Video del producto + pitch (máx. 3 min) | _PENDIENTE: pegar enlace público de YouTube_ |
 | Publicación en redes (bono, opcional) | _PENDIENTE_ |
