@@ -34,7 +34,12 @@ Implementa la opción B declarada en el Entregable 3: capacidades nativas de Ste
 - `/.well-known/assetlinks.json` para que la app abra a pantalla completa.
 - En iPhone se instala como PWA desde Safari ("Agregar a pantalla de inicio").
 
-## 5. Calidad
+## 5. Video del MVP
+
+- Video de 2:25 con la demo y el pitch: https://youtube.com/shorts/wU0fWStE4wo
+- Narración grabada y limpiada (reducción de ruido y nivel de volumen), sincronizada con la grabación de pantalla de la app en Android, incluido el sello semanal.
+
+## 6. Calidad
 
 - Las 10 pruebas e2e existentes siguen pasando. Además se probaron la wallet, el selector de foto, la persistencia de datos y el cierre de sesión.
 - Lint, verificación de tipos y compilación de producción sin errores.

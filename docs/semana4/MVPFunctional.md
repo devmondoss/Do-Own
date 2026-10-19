@@ -8,7 +8,7 @@
 | App para Android (generador del instalador en PWABuilder) | [Reporte y descarga](https://pwabuilder.com/reportcard?site=https://do-own-six.vercel.app) |
 | App para Android (.apk) | [Descargar Do-Own.apk](https://do-own-six.vercel.app/Do-Own.apk) |
 | Demo anterior (Semana 3, sin red) | [do-own.vercel.app](https://do-own.vercel.app/bienvenida) |
-| Video del producto + pitch (máx. 3 min) | _PENDIENTE: pegar enlace público de YouTube_ |
+| Video del producto + pitch (2:25) | [YouTube: Do-Own · MVP funcional en Stellar](https://youtube.com/shorts/wU0fWStE4wo) |
 | Publicación en redes (bono, opcional) | _PENDIENTE_ |
 | Todas las transacciones en Stellar Testnet | [EvidenciaTestnet.md](./EvidenciaTestnet.md) |
 | Cuenta creada con reservas patrocinadas (0 XLM) | [69ff7a86bb…](https://stellar.expert/explorer/testnet/tx/69ff7a86bbc322bba068379812f8026bac178bfecf7ed715442d7c35001079fc) |
@@ -64,7 +64,7 @@ El presupuesto de recompensas podría no sostener el uso real del grupo si la fr
 - Ejecutar las 5 sesiones de validación con usuarios reales del perfil definido en el Problem Brief.
 - Definir un canal de adquisición concreto (no solo candidatos).
 - Sostener 2–3 conversaciones reales con empresas potenciales patrocinadoras para validar el modelo B2B2C.
-- Dejar cargado el enlace al video del pitch (el producto en línea y las transacciones verificables en testnet ya están en la sección de evidencia).
+- ~~Dejar cargado el enlace al video del pitch~~ ✅ hecho: el video, el producto en línea y las transacciones verificables en testnet están en la sección de evidencia.
 
 ---
 
