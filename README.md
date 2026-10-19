@@ -141,6 +141,6 @@ Do-Own es una PWA: se puede instalar desde el navegador ("Agregar a pantalla de 
 - **Descargar el paquete ya generado (.apk / .aab):** [Paquete Android en PWABuilder](https://pwabuilder.com/google-play-packaging-status?jobId=googleplaypackagejob%3Ado-own-six.vercel.app%3Ae42d899b-b9ae-4b99-a3e3-f0cbbe1a838c). El enlace lo genera PWABuilder y puede caducar; si ya no funciona, se vuelve a generar con el paso siguiente.
 - **Generar el instalador (.apk):** abrir el [reporte de PWABuilder](https://pwabuilder.com/reportcard?site=https://do-own-six.vercel.app), presionar **Package for stores**, luego **Android** y luego **Generate**. Se descarga un .zip con el `.apk` (para instalar directo en el teléfono) y el `.aab` (para Google Play).
 - **Instalar en el teléfono:** pasar el `.apk` al teléfono, abrirlo y permitir "instalar apps de origen desconocido" cuando Android lo pida.
-- **Pantalla completa:** el .zip incluye `assetlinks.json`. Debe copiarse a `frontend/public/.well-known/assetlinks.json` para que la app abra sin la barra del navegador.
+- **Pantalla completa:** ya está configurado en `frontend/public/.well-known/assetlinks.json` (paquete `app.vercel.do_own_six.twa`). Si se genera un paquete nuevo con otra firma, hay que reemplazar ese archivo con el `assetlinks.json` del nuevo .zip.
 - **iPhone:** en Safari, **Compartir** y luego **Agregar a pantalla de inicio**.
 
