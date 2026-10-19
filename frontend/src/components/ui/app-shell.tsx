@@ -2,10 +2,10 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Bell,
+  Camera,
   BookOpen,
   CirclePlus,
   House,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Brand, cn } from "./primitives";
 import { useDemo } from "@/providers/demo-provider";
+import { useAvatar } from "@/providers/avatar-provider";
 
 const destinations = [
   { href: "/inicio", label: "Inicio", icon: House },
@@ -78,6 +79,7 @@ export function AppShell({
   const pathname = usePathname();
   const [panel, setPanel] = useState<"notifications" | "profile" | null>(null);
   const { data } = useDemo();
+  const avatar = useAvatar();
   return (
     <div className={cn("app-layout", focused && "app-layout-focused")}>
       <aside className="sidebar">
@@ -126,7 +128,8 @@ export function AppShell({
               aria-expanded={panel === "profile"}
               onClick={() => setPanel(panel === "profile" ? null : "profile")}
             >
-              <Image src="/images/ana.jpg" alt="" width={36} height={36} />
+              {/* eslint-disable-next-line @next/next/no-img-element -- avatar may be a local data URL */}
+              <img src={avatar.src} alt="" width={36} height={36} />
             </button>
           </div>
         </header>
@@ -165,6 +168,16 @@ export function AppShell({
                   Tu progreso es tuyo. Llevas {data.streakDays} días
                   construyendo buenos hábitos.
                 </p>
+                <button
+                  className="text-link"
+                  onClick={() => {
+                    setPanel(null);
+                    avatar.openPicker();
+                  }}
+                >
+                  <Camera size={16} />
+                  Cambiar foto de perfil
+                </button>
                 <span className="demo-caption">Perfil de demostración</span>
               </>
             )}

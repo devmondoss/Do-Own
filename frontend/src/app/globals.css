@@ -3909,3 +3909,112 @@ button:disabled {
 .verify-card .transfer-summary {
   width: 100%;
 }
+
+/* ---- Avatar picker ---- */
+.avatar-button img {
+  display: block;
+}
+.greeting-avatar-button {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.greeting-avatar-edit {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #7c3aed;
+  color: #fff;
+  border: 2px solid #fff;
+}
+.avatar-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(88vh, 760px);
+  overflow-y: auto;
+}
+.avatar-dialog h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 12px 0 4px;
+}
+.avatar-upload-row .field-hint {
+  margin: 6px 0 0;
+}
+.avatar-current {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e9ddff;
+  flex-shrink: 0;
+}
+.avatar-section h3 {
+  margin: 14px 0 8px;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b6385;
+}
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.avatar-option {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+.avatar-option img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: block;
+}
+.avatar-option:hover {
+  transform: scale(1.05);
+}
+.avatar-option[aria-pressed="true"] {
+  border-color: #7c3aed;
+}
+.avatar-option:focus-visible {
+  outline: 3px solid #10b981;
+  outline-offset: 2px;
+}
+.avatar-check {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #7c3aed;
+  color: #fff;
+  border: 2px solid #fff;
+}
+.avatar-reset {
+  margin-top: 16px;
+}

@@ -3,6 +3,7 @@ import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 import { DemoProvider } from "@/providers/demo-provider";
 import { WalletProvider } from "@/providers/wallet-provider";
+import { AvatarProvider } from "@/providers/avatar-provider";
 import { PwaRegister } from "@/components/ui/pwa-register";
 
 export const metadata: Metadata = {
@@ -30,7 +31,9 @@ export default function RootLayout({
           Saltar al contenido
         </a>
         <DemoProvider>
-          <WalletProvider>{children}</WalletProvider>
+          <WalletProvider>
+            <AvatarProvider>{children}</AvatarProvider>
+          </WalletProvider>
         </DemoProvider>
         <PwaRegister />
       </body>
