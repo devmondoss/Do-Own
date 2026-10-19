@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -98,6 +99,11 @@ export function WelcomeScreen() {
               <ArrowRight size={18} />
             </Button>
           </form>
+          {enabled && (
+            <Link className="text-link welcome-restore" href="/cuenta">
+              ¿Ya tenías una cuenta? Recupérala con tu clave
+            </Link>
+          )}
           <p className="welcome-privacy">
             <ShieldCheck size={17} />
             {enabled

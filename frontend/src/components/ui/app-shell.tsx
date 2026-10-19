@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
+  LogOut,
   Camera,
   BookOpen,
   CirclePlus,
@@ -18,6 +19,7 @@ import {
 import { Brand, cn } from "./primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { useAvatar } from "@/providers/avatar-provider";
+import { LogoutDialog } from "./logout-dialog";
 
 const destinations = [
   { href: "/inicio", label: "Inicio", icon: House },
@@ -80,6 +82,7 @@ export function AppShell({
   const [panel, setPanel] = useState<"notifications" | "profile" | null>(null);
   const { data, live } = useDemo();
   const avatar = useAvatar();
+  const logout = useRef<HTMLDialogElement>(null);
   return (
     <div className={cn("app-layout", focused && "app-layout-focused")}>
       <aside className="sidebar">
@@ -182,6 +185,16 @@ export function AppShell({
                   <Camera size={16} />
                   Cambiar foto de perfil
                 </button>
+                <button
+                  className="text-link logout-link"
+                  onClick={() => {
+                    setPanel(null);
+                    logout.current?.showModal();
+                  }}
+                >
+                  <LogOut size={16} />
+                  Cerrar sesión
+                </button>
                 {!live && (
                   <span className="demo-caption">Perfil de demostración</span>
                 )}
@@ -191,6 +204,7 @@ export function AppShell({
         )}
         {children}
         {!focused && <BottomNavigation />}
+        <LogoutDialog ref={logout} />
       </div>
     </div>
   );
