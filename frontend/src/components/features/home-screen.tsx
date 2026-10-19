@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   BookOpen,
+  Camera,
   Check,
   ChevronRight,
   CircleDollarSign,
@@ -22,6 +22,7 @@ import {
   SectionHeading,
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
+import { useAvatar } from "@/providers/avatar-provider";
 import type { DailyAction } from "@/types/do-own";
 
 const actions = [
@@ -56,6 +57,7 @@ const actions = [
 
 export function HomeScreen() {
   const { data } = useDemo();
+  const avatar = useAvatar();
   const completed = data.completedActions.length;
   return (
     <main id="contenido" className="page home-page">
@@ -68,13 +70,23 @@ export function HomeScreen() {
         <Card className="greeting-card">
           <div className="greeting-row">
             <div className="greeting-user">
-              <Image
-                src="/images/ana.jpg"
-                alt={data.profile.name}
-                width={52}
-                height={52}
-                className="greeting-avatar"
-              />
+              <button
+                className="greeting-avatar-button"
+                onClick={avatar.openPicker}
+                aria-label="Cambiar foto de perfil"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- avatar may be a local data URL */}
+                <img
+                  src={avatar.src}
+                  alt={data.profile.name}
+                  width={52}
+                  height={52}
+                  className="greeting-avatar"
+                />
+                <span className="greeting-avatar-edit" aria-hidden="true">
+                  <Camera size={12} />
+                </span>
+              </button>
               <div>
                 <h1>Hola, {data.profile.name}</h1>
                 <p>

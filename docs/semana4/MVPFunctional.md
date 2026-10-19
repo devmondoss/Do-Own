@@ -4,10 +4,16 @@
 
 | Qué | Enlace |
 |---|---|
-| Producto en línea (PWA instalable en el teléfono) | [do-own.vercel.app](https://do-own.vercel.app/bienvenida) |
+| Producto en línea con wallet en testnet (PWA instalable en el teléfono) | [do-own-six.vercel.app](https://do-own-six.vercel.app/bienvenida) |
+| Demo anterior (Semana 3, sin red) | [do-own.vercel.app](https://do-own.vercel.app/bienvenida) |
 | Video del producto + pitch (máx. 3 min) | _PENDIENTE: pegar enlace público de YouTube_ |
 | Publicación en redes (bono, opcional) | _PENDIENTE_ |
-| Transacciones en Stellar Testnet (explorador público) | [EvidenciaTestnet.md](./EvidenciaTestnet.md) |
+| Todas las transacciones en Stellar Testnet | [EvidenciaTestnet.md](./EvidenciaTestnet.md) |
+| Cuenta creada con reservas patrocinadas (0 XLM) | [69ff7a86bb…](https://stellar.expert/explorer/testnet/tx/69ff7a86bbc322bba068379812f8026bac178bfecf7ed715442d7c35001079fc) |
+| Recompensa DOWN con memo hash | [1ec60fff9a…](https://stellar.expert/explorer/testnet/tx/1ec60fff9a99d942c1080478cfa67444dcf03a3e265964e28a63d1f204ebfc4a) |
+| Sello semanal (memo hash + fee bump) | [47db7b6018…](https://stellar.expert/explorer/testnet/tx/47db7b601848c155310104930dfd0711dd427901a308ba36bf0c729369138122) |
+| Verificación pública del sello | [Abrir](https://do-own-six.vercel.app/verificar?tx=47db7b601848c155310104930dfd0711dd427901a308ba36bf0c729369138122&root=addf2451b34926cfbb6bcb00182fd411393cc89b8fa31043471a96c43b0d4b58) |
+| Activo DOWN y tesorería | [DOWN](https://stellar.expert/explorer/testnet/asset/DOWN-GA6WNG33B7IPAAWXR4ZZ5Y5VOZRMHGDBDOLT2R575PTCSYVSO4OGOKF5) · [Tesorería](https://stellar.expert/explorer/testnet/account/GAUR5HX7W4SVUM5LWLF5EARTEZF72SSWQBBPFZ7CCAYFWW6T32QKLY7B) |
 | Código de la integración | [`frontend/src/lib/stellar/`](../../frontend/src/lib/stellar/) y [`frontend/src/app/api/stellar/`](../../frontend/src/app/api/stellar/) |
 
 Tecnología declarada en el Entregable 3: **opción B — solución existente del ecosistema** (capacidades nativas de Stellar: memo hash y reservas patrocinadas, sin contrato Soroban propio). Esta semana quedó integrada en el front y funcionando en testnet.
@@ -56,7 +62,7 @@ El presupuesto de recompensas podría no sostener el uso real del grupo si la fr
 - Ejecutar las 5 sesiones de validación con usuarios reales del perfil definido en el Problem Brief.
 - Definir un canal de adquisición concreto (no solo candidatos).
 - Sostener 2–3 conversaciones reales con empresas potenciales patrocinadoras para validar el modelo B2B2C.
-- Dejar cargada la evidencia pública: enlace al producto, video del pitch, y transacciones verificables en el explorador de testnet.
+- Dejar cargado el enlace al video del pitch (el producto en línea y las transacciones verificables en testnet ya están en la sección de evidencia).
 
 ---
 
