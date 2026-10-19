@@ -20,6 +20,19 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Content-Type", value: "application/json" }],
       },
       {
+        source: "/Do-Own.apk",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/vnd.android.package-archive",
+          },
+          {
+            key: "Content-Disposition",
+            value: 'attachment; filename="Do-Own.apk"',
+          },
+        ],
+      },
+      {
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
