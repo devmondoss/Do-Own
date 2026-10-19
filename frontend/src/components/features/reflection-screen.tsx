@@ -36,7 +36,7 @@ const dateLabel = (value: string) =>
   }).format(new Date(value));
 
 export function ReflectionScreen() {
-  const { data } = useDemo();
+  const { data, live } = useDemo();
   const records = recentDecisions(data.decisions);
   const days = new Set(records.map((record) => decisionDate(record.createdAt)))
     .size;
@@ -45,7 +45,7 @@ export function ReflectionScreen() {
       <FlowHeader
         title="Mi reflexión semanal"
         back="/progreso"
-        action={<Badge tone="neutral">Demo</Badge>}
+        action={live ? undefined : <Badge tone="neutral">Demo</Badge>}
       />
       <section className="reflection-intro">
         <span className="eyebrow">OBSERVAR TAMBIÉN ES AVANZAR</span>
@@ -55,8 +55,9 @@ export function ReflectionScreen() {
           buenas o malas: aquí puedes observarlas.
         </p>
         <span className="field-hint">
-          Últimos 7 días a partir de tu registro más reciente. Incluye datos de
-          ejemplo y los registros de esta sesión.
+          {live
+            ? "Últimos 7 días a partir de tu registro más reciente."
+            : "Últimos 7 días a partir de tu registro más reciente. Incluye datos de ejemplo y los registros de esta sesión."}
         </span>
       </section>
       <div className="reflection-grid">
@@ -206,7 +207,9 @@ export function ReflectionScreen() {
         </Card>
       </div>
       <p className="flow-demo-label">
-        Datos en memoria · tus nuevos registros se reinician al recargar.
+        {live
+          ? "Tus registros se guardan solo en este dispositivo."
+          : "Datos en memoria · tus nuevos registros se reinician al recargar."}
       </p>
     </main>
   );

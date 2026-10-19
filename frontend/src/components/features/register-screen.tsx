@@ -70,7 +70,7 @@ const emotions = [
 
 export function RegisterScreen() {
   const router = useRouter();
-  const { saveDecision, notify } = useDemo();
+  const { saveDecision, notify, live } = useDemo();
   const [amount, setAmount] = useState("250.00");
   const [category, setCategory] = useState<DecisionCategory>("antojo");
   const [emotion, setEmotion] = useState<Emotion>("tranquilo");
@@ -127,7 +127,11 @@ export function RegisterScreen() {
     // DEMO(UI): mark steps in memory, never claim these were saved on a server.
     // TODO(BACKEND): await success, handle errors/loading and only then navigate.
     saveDecision(input);
-    notify("Decisión registrada en la demo. Tienes una recompensa disponible.");
+    notify(
+      live
+        ? "Decisión registrada. Tienes una recompensa disponible."
+        : "Decisión registrada en la demo. Tienes una recompensa disponible.",
+    );
     router.push("/recompensa");
   }
   return (
@@ -319,7 +323,9 @@ export function RegisterScreen() {
             <CheckCircle2 size={19} />
           </Button>
           <span className="flow-demo-label">
-            Registro de demostración · sin persistencia
+            {live
+              ? "Tu registro se guarda solo en este dispositivo"
+              : "Registro de demostración · sin persistencia"}
           </span>
         </footer>
       </form>

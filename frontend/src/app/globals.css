@@ -4018,3 +4018,48 @@ button:disabled {
 .avatar-reset {
   margin-top: 16px;
 }
+
+.is-missed .day-circle {
+  background: #ece9f3;
+  box-shadow: inset 0 0 0 1.5px #d9d3e6;
+}
+
+/* ---- Sign out ---- */
+.logout-link {
+  color: #b42318;
+  margin-top: 4px;
+}
+.logout-dialog {
+  width: min(460px, calc(100vw - 32px));
+}
+.logout-dialog h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.logout-dialog p {
+  margin: 0;
+}
+.logout-dialog > * + * {
+  margin-top: 12px;
+}
+.logout-key {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+.logout-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+.logout-confirm input {
+  width: 20px;
+  height: 20px;
+  accent-color: #7c3aed;
+}
+.welcome-restore {
+  display: block;
+  margin: 12px auto 0;
+  text-align: center;
+}

@@ -31,7 +31,7 @@ import { formatDown, useWallet } from "@/providers/wallet-provider";
 import { decisionWeekday, recentDecisions } from "@/lib/decision-summary";
 
 export function ProgressScreen() {
-  const { data } = useDemo();
+  const { data, live } = useDemo();
   const wallet = useWallet();
   const [tab, setTab] = useState<"history" | "earn">("history");
   const [showAll, setShowAll] = useState(false);
@@ -139,10 +139,15 @@ export function ProgressScreen() {
               <IconTile icon={Flame} tone="amber" />
               <div>
                 <h2>
-                  Racha de ejemplo: {data.streakDays} días{" "}
+                  {live ? "Tu racha" : "Racha de ejemplo"}: {data.streakDays}{" "}
+                  {data.streakDays === 1 ? "día" : "días"}{" "}
                   <span aria-hidden="true">🔥</span>
                 </h2>
-                <p>Tus registros de ejemplo y de esta sesión</p>
+                <p>
+                  {live
+                    ? "Días seguidos con al menos un registro"
+                    : "Tus registros de ejemplo y de esta sesión"}
+                </p>
               </div>
             </div>
             <div
