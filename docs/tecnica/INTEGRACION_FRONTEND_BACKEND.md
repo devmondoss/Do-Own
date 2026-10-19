@@ -88,3 +88,12 @@ La aplicación funciona en Vercel sin variables de entorno. Al integrarla en el 
 ## Validación de esta versión
 
 El 15 de octubre de 2026 se aprobaron diez pruebas de navegador sobre la compilación local: navegación de las nueve vistas, bienvenida, foto y formulario, premios únicos, repaso de la lección, envío con confirmación, comprobante, adaptación y PWA, junto con accesibilidad automatizada en móvil y escritorio. Se revisaron capturas a 360, 430 y 1440 px. Lint, TypeScript, formato y compilación también pasaron desde la carpeta integrada `frontend/`. Esta comprobación automatizada complementa la revisión visual; no sustituye una auditoría manual de accesibilidad ni pruebas con usuarios.
+
+## Integración de Backend (wallet), Frontend con Stellar
+
+Wallet integrada y Stellar Testnet: reservas patrocinadas, recompensas DOWN, sello semanal con fee bump, envíos y página /verificar.
+Evidencia verificable: tu despliegue y las 9 transacciones en el explorador.
+Experiencia de usuario: foto de perfil, datos reales y cerrar sesión.
+App para Android: el .apk, el botón de descarga y la pantalla completa.
+
+Calidad: pruebas, lint y compilación.
