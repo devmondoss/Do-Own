@@ -18,9 +18,11 @@ import {
   Gift,
   History,
   Wallet,
+  Coins,
 } from "lucide-react";
 import { Brand, cn } from "./primitives";
 import { useDemo } from "@/providers/demo-provider";
+import { formatDown, useWallet } from "@/providers/wallet-provider";
 import { useAvatar } from "@/providers/avatar-provider";
 import { LogoutDialog } from "./logout-dialog";
 
@@ -30,15 +32,17 @@ const destinations = [
   { href: "/registro", label: "Registro", icon: CirclePlus },
   { href: "/progreso", label: "Recompensas", icon: Star },
 ];
+// Mobile: "Historial" is one tap away (all registered amounts).
+const mobileDestinations = [
+  destinations[0],
+  destinations[1],
+  destinations[2],
+  { href: "/historial", label: "Historial", icon: History },
+  destinations[3],
+];
 
 // Pages reached from "Recompensas" on mobile keep that tab highlighted.
-const SUB_PAGES = [
-  "/cuenta",
-  "/reflexion",
-  "/historial",
-  "/constancia",
-  "/mis-recompensas",
-];
+const SUB_PAGES = ["/cuenta", "/reflexion", "/constancia", "/mis-recompensas"];
 
 export function BottomNavigation({ desktop = false }: { desktop?: boolean }) {
   const pathname = usePathname();
@@ -51,7 +55,7 @@ export function BottomNavigation({ desktop = false }: { desktop?: boolean }) {
         { href: "/reflexion", label: "Mi semana", icon: CalendarDays },
         { href: "/cuenta", label: "Mi cuenta", icon: Wallet },
       ]
-    : destinations;
+    : mobileDestinations;
   return (
     <nav
       aria-label={desktop ? "Navegación de escritorio" : "Navegación principal"}
@@ -94,7 +98,11 @@ export function AppShell({
   const pathname = usePathname();
   const [panel, setPanel] = useState<"notifications" | "profile" | null>(null);
   const { data, live } = useDemo();
+  const wallet = useWallet();
   const avatar = useAvatar();
+  const balanceText = wallet.enabled
+    ? `${formatDown(wallet.balance)} DOWN`
+    : `${data.balanceUnits} créditos`;
   const logout = useRef<HTMLDialogElement>(null);
   return (
     <div className={cn("app-layout", focused && "app-layout-focused")}>
@@ -129,6 +137,14 @@ export function AppShell({
           <Brand />
           <div className="top-actions">
             {!live && <span className="demo-label">Demo</span>}
+            <Link
+              href="/mis-recompensas"
+              className="balance-chip"
+              aria-label={`Tus recompensas acumuladas: ${balanceText}. Ver mis recompensas`}
+            >
+              <Coins size={16} aria-hidden="true" />
+              {balanceText}
+            </Link>
             <button
               className="notification-button icon-button"
               aria-label="Notificaciones"

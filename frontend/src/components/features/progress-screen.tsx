@@ -30,6 +30,7 @@ import { useDemo } from "@/providers/demo-provider";
 import { formatDown, useWallet } from "@/providers/wallet-provider";
 import { decisionWeekday, recentDecisions } from "@/lib/decision-summary";
 import { lessons } from "@/data/mock-data";
+import { AmountsSummary } from "./amounts-summary";
 
 export function ProgressScreen() {
   const { data, live } = useDemo();
@@ -137,6 +138,7 @@ export function ProgressScreen() {
           aria-labelledby="tab-history"
           className="progress-content"
         >
+          <AmountsSummary decisions={data.decisions} latest={5} />
           <Card className="streak-card">
             <div className="streak-title">
               <IconTile icon={Flame} tone="amber" />
@@ -148,7 +150,7 @@ export function ProgressScreen() {
                 </h2>
                 <p>
                   {live
-                    ? "Días seguidos con al menos un registro"
+                    ? "Esta semana (lunes a domingo). Tus montos de semanas anteriores siguen en tu historial."
                     : "Tus registros de ejemplo y de esta sesión"}
                 </p>
               </div>

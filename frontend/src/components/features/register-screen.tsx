@@ -23,6 +23,16 @@ import {
   cn,
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
+import {
+  deleteEvidence,
+  getEvidence,
+  saveEvidence,
+} from "@/lib/evidence-store";
+
+// If the phone reloads the page while the camera is open (common on Android),
+// the form comes back with what the person already wrote and the photo.
+const DRAFT_KEY = "do-own.draft.v1";
+const DRAFT_PHOTO = "draft";
 import { handleAnalizarFoto, handleGuardarDecision } from "@/lib/integrations";
 import type { Currency, DecisionCategory, Emotion } from "@/types/do-own";
 import { currencyNames, emotionOptions } from "@/lib/labels";
@@ -63,6 +73,46 @@ export function RegisterScreen() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [photoError, setPhotoError] = useState("");
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        /* eslint-disable react-hooks/set-state-in-effect -- restores an unsent draft once */
+        if (typeof d.item === "string") setItem(d.item);
+        if (typeof d.amount === "string") setAmount(d.amount);
+        if (d.currency === "MXN" || d.currency === "USD")
+          setCurrency(d.currency);
+        if (typeof d.category === "string") setCategory(d.category);
+        if (typeof d.emotion === "string") setEmotion(d.emotion);
+        if (typeof d.note === "string") setNote(d.note);
+        /* eslint-enable react-hooks/set-state-in-effect */
+      }
+    } catch {
+      /* ignore */
+    }
+    void getEvidence(DRAFT_PHOTO).then((blob) => {
+      if (!blob) return;
+      const file = new File([blob], "evidencia.jpg", {
+        type: blob.type || "image/jpeg",
+      });
+      setPhoto(file);
+      setPreview(URL.createObjectURL(file));
+    });
+    setDraftLoaded(true);
+  }, []);
+  useEffect(() => {
+    if (!draftLoaded) return;
+    try {
+      window.localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({ item, amount, currency, category, emotion, note }),
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [draftLoaded, item, amount, currency, category, emotion, note]);
   useEffect(
     () => () => {
       if (preview) URL.revokeObjectURL(preview);
@@ -83,6 +133,7 @@ export function RegisterScreen() {
     setPhotoError("");
     setPhoto(file);
     setPreview(URL.createObjectURL(file));
+    void saveEvidence(DRAFT_PHOTO, file);
     handleAnalizarFoto(file);
   }
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -128,6 +179,12 @@ export function RegisterScreen() {
     // DEMO(UI): mark steps in memory, never claim these were saved on a server.
     // TODO(BACKEND): await success, handle errors/loading and only then navigate.
     saveDecision(input);
+    try {
+      window.localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+    void deleteEvidence(DRAFT_PHOTO);
     notify(
       live
         ? "Decisión registrada. Tienes una recompensa disponible."
@@ -187,6 +244,7 @@ export function RegisterScreen() {
                   aria-label="Quitar foto"
                   onClick={() => {
                     setPhoto(null);
+                    void deleteEvidence(DRAFT_PHOTO);
                     setPreview("");
                   }}
                 >

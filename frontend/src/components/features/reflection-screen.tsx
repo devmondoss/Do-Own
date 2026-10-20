@@ -55,6 +55,9 @@ export function ReflectionScreen() {
             ? "Últimos 7 días a partir de tu registro más reciente."
             : "Últimos 7 días a partir de tu registro más reciente. Incluye datos de ejemplo y los registros de esta sesión."}
         </span>
+        <Link className="text-link" href="/historial">
+          ¿Buscas registros anteriores? Ver todos mis montos →
+        </Link>
       </section>
       <div className="reflection-grid">
         <Card className="reflection-summary">

@@ -13,6 +13,7 @@ const DEVICE_KEYS = [
   "do-own.seals.v1",
   "do-own.rewards.v1",
   "do-own.avatar.v1",
+  "do-own.draft.v1",
 ];
 
 /** Sign-out confirmation. Data lives only on this device, so before erasing
