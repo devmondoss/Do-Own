@@ -11,9 +11,9 @@ import {
 } from "react";
 import { CheckCircle2, X } from "lucide-react";
 import { initialDemo } from "@/data/mock-data";
-import { decisionDate } from "@/lib/decision-summary";
+import { computeStreak, earnedPeriodRewards, todayKey } from "@/lib/periods";
+import { deleteEvidence, saveEvidence } from "@/lib/evidence-store";
 import type {
-  DecisionRecord,
   DecisionInput,
   DemoSnapshot,
   TransferInput,
@@ -23,9 +23,11 @@ interface DemoContextValue {
   data: DemoSnapshot;
   /** true when the server has the Stellar wallet configured: real, persisted data. */
   live: boolean;
-  startDemo: (name: string) => void;
+  startDemo: (name: string, email?: string) => void;
   saveDecision: (input: DecisionInput) => void;
-  completeLesson: () => void;
+  /** Attach, replace (file) or remove (null) the evidence photo of a record. */
+  setEvidence: (recordId: string, file: File | null) => Promise<void>;
+  completeLesson: (lessonId?: string) => void;
   claimDemoReward: (id: string) => void;
   transferDemo: (input: TransferInput) => void;
   notify: (message: string) => void;
@@ -40,6 +42,7 @@ const freshState: DemoSnapshot = {
   streakDays: 0,
   completedActions: [],
   lessonCompleted: false,
+  lessonsCompleted: [],
   onboardingComplete: false,
   decisions: [],
   rewards: [],
@@ -120,13 +123,37 @@ export function DemoProvider({
     [],
   );
 
+  // Period rewards (weekly / monthly constancy) appear as "available" as soon
+  // as their rules are met. Their ids are deterministic, so they are only
+  // ever added once and the server can never pay them twice.
+  useEffect(() => {
+    if (!hydrated) return;
+    const earned = earnedPeriodRewards(state.decisions);
+    const missing = earned.filter(
+      (reward) => !state.rewards.some((r) => r.id === reward.id),
+    );
+    if (!missing.length) return;
+    const now = new Date().toISOString();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- derived rewards are appended once
+    setData((current) => ({
+      ...current,
+      rewards: [
+        ...current.rewards,
+        ...missing
+          .filter((m) => !current.rewards.some((r) => r.id === m.id))
+          .map((m) => ({ ...m, createdAt: now })),
+      ],
+    }));
+  }, [hydrated, state.decisions, state.rewards]);
+
   const startDemo = useCallback(
-    (name: string) => {
+    (name: string, email?: string) => {
       setData((current) => ({
         ...current,
         profile: {
           ...current.profile,
           name: name.trim() || (live ? current.profile.name : "Ana"),
+          ...(email?.trim() ? { email: email.trim() } : {}),
         },
         onboardingComplete: true,
       }));
@@ -137,6 +164,8 @@ export function DemoProvider({
   const saveDecision = useCallback((input: DecisionInput) => {
     const id = crypto.randomUUID();
     const { attachment, ...privateFields } = input;
+    // F02: the photo stays on this device (IndexedDB), never uploaded.
+    if (attachment) void saveEvidence(id, attachment);
     // DEMO(UI): one reward per decision; this does not indicate API success.
     setData((current) => ({
       ...current,
@@ -163,33 +192,54 @@ export function DemoProvider({
           reason: "registro",
           units: 1,
           status: "available",
+          createdAt: new Date().toISOString(),
         },
       ],
     }));
   }, []);
 
-  const completeLesson = useCallback(() => {
+  const setEvidence = useCallback(
+    async (recordId: string, file: File | null) => {
+      if (file) await saveEvidence(recordId, file);
+      else await deleteEvidence(recordId);
+      setData((current) => ({
+        ...current,
+        decisions: current.decisions.map((d) =>
+          d.id === recordId ? { ...d, photoAttached: !!file } : d,
+        ),
+      }));
+    },
+    [],
+  );
+
+  const completeLesson = useCallback((lessonId = "antojo-v1") => {
     // TODO(BACKEND): validate answers and award a lesson only once on the server.
-    setData((current) =>
-      current.lessonCompleted
-        ? current
-        : {
-            ...current,
-            lessonCompleted: true,
-            completedActions: Array.from(
-              new Set([...current.completedActions, "lesson" as const]),
-            ),
-            rewards: [
-              ...current.rewards,
-              {
-                id: "lesson-antojo-v1",
-                reason: "aprendizaje",
-                units: 1,
-                status: "available",
-              },
-            ],
+    setData((current) => {
+      const done =
+        current.lessonsCompleted ??
+        (current.lessonCompleted ? ["antojo-v1"] : []);
+      const actions = Array.from(
+        new Set([...current.completedActions, "lesson" as const]),
+      );
+      if (done.includes(lessonId))
+        return { ...current, completedActions: actions };
+      return {
+        ...current,
+        lessonCompleted: current.lessonCompleted || lessonId === "antojo-v1",
+        lessonsCompleted: [...done, lessonId],
+        completedActions: actions,
+        rewards: [
+          ...current.rewards,
+          {
+            id: `lesson-${lessonId}`,
+            reason: "aprendizaje",
+            units: 1,
+            status: "available",
+            createdAt: new Date().toISOString(),
           },
-    );
+        ],
+      };
+    });
   }, []);
 
   const claimDemoReward = useCallback((id: string) => {
@@ -203,7 +253,13 @@ export function DemoProvider({
         ...current,
         balanceUnits: current.balanceUnits + grant.units,
         rewards: current.rewards.map((reward) =>
-          reward.id === id ? { ...reward, status: "claimed" as const } : reward,
+          reward.id === id
+            ? {
+                ...reward,
+                status: "claimed" as const,
+                claimedAt: new Date().toISOString(),
+              }
+            : reward,
         ),
       };
     });
@@ -241,6 +297,7 @@ export function DemoProvider({
         live,
         startDemo,
         saveDecision,
+        setEvidence,
         completeLesson,
         claimDemoReward,
         transferDemo,
@@ -268,28 +325,10 @@ export function useDemo() {
   return context;
 }
 
-function todayKey() {
-  return decisionDate(new Date().toISOString());
-}
-
-/** Consecutive days (Mexico City calendar) with at least one decision,
- * counting back from today — or from yesterday if today has none yet. */
-export function computeStreak(decisions: DecisionRecord[]) {
-  const days = new Set(decisions.map((d) => decisionDate(d.createdAt)));
-  let cursor = Date.parse(`${todayKey()}T12:00:00Z`);
-  if (!days.has(new Date(cursor).toISOString().slice(0, 10)))
-    cursor -= 86400000;
-  let streak = 0;
-  while (days.has(new Date(cursor).toISOString().slice(0, 10))) {
-    streak += 1;
-    cursor -= 86400000;
-  }
-  return streak;
-}
-
 /** Simple progression: 10 XP per decision, 12 per lesson, 150 XP per level. */
 function computeLevel(snapshot: DemoSnapshot) {
-  const xp =
-    snapshot.decisions.length * 10 + (snapshot.lessonCompleted ? 12 : 0);
+  const lessonsDone =
+    snapshot.lessonsCompleted?.length ?? (snapshot.lessonCompleted ? 1 : 0);
+  const xp = snapshot.decisions.length * 10 + lessonsDone * 12;
   return 1 + Math.floor(xp / 150);
 }

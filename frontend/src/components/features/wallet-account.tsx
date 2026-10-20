@@ -6,6 +6,7 @@ import {
   ArrowDownLeft,
   ArrowRight,
   CheckCircle2,
+  Info,
   Copy,
   ExternalLink,
   Gift,
@@ -89,7 +90,9 @@ export function WalletAccount() {
       setAmount("");
     } catch (e) {
       dialog.current?.close();
-      setError(e instanceof Error ? e.message : "No se pudo enviar.");
+      setError(
+        `Envío fallido, no se movió nada. ${e instanceof Error ? e.message : "Inténtalo de nuevo."}`,
+      );
     } finally {
       setBusy(false);
     }
@@ -300,6 +303,44 @@ export function WalletAccount() {
           </form>
         </Card>
 
+        <Card className="asset-explainer">
+          <IconTile icon={Info} tone="neutral" />
+          <div>
+            <h2>¿Qué es lo que tienes aquí?</h2>
+            <dl>
+              <div>
+                <dt>Qué tienes</dt>
+                <dd>
+                  DOWN: recompensas digitales que ganas por registrar y
+                  aprender. Hoy son de prueba y no tienen valor en dinero.
+                </dd>
+              </div>
+              <div>
+                <dt>Dónde está</dt>
+                <dd>
+                  En tu cuenta digital, en la red de prueba de Stellar. La llave
+                  vive solo en este dispositivo: nadie más puede moverlas.
+                </dd>
+              </div>
+              <div>
+                <dt>Quién paga</dt>
+                <dd>
+                  Do-Own paga la activación y cada comisión de la red. Tú pagas
+                  $0.
+                </dd>
+              </div>
+              <div>
+                <dt>Puntos vs. DOWN</dt>
+                <dd>
+                  Los puntos y tu nivel miden tu avance dentro de la app. Los
+                  DOWN son tuyos: puedes verlos en un registro público y
+                  enviarlos a otra cuenta.
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </Card>
+
         <section className="account-activity">
           <SectionHeading>
             Movimientos
@@ -358,6 +399,10 @@ export function WalletAccount() {
                       </a>
                       {!p.fromSponsor && ` · ${short(p.counterparty)}`}
                     </p>
+                    <span className="movement-status">
+                      <CheckCircle2 size={13} /> Completada · comisión $0
+                      (Do-Own)
+                    </span>
                   </div>
                   <strong>
                     {p.direction === "in" ? "+" : "−"}
@@ -431,8 +476,20 @@ export function WalletAccount() {
             <dd>{draft ? short(draft.to) : ""}</dd>
           </div>
           <div>
-            <dt>Comisión</dt>
-            <dd>La cubre Do-Own</dd>
+            <dt>Comisión de la red</dt>
+            <dd>0.00001 XLM · la paga Do-Own (tú: $0)</dd>
+          </div>
+          <div>
+            <dt>Estado</dt>
+            <dd
+              className={`tx-status tx-${sentHash ? "ok" : busy ? "busy" : "draft"}`}
+            >
+              {sentHash
+                ? "Completada"
+                : busy
+                  ? "Pendiente: enviando a la red…"
+                  : "Por confirmar"}
+            </dd>
           </div>
         </dl>
         {sentHash ? (

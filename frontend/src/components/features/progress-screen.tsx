@@ -29,9 +29,12 @@ import {
 import { useDemo } from "@/providers/demo-provider";
 import { formatDown, useWallet } from "@/providers/wallet-provider";
 import { decisionWeekday, recentDecisions } from "@/lib/decision-summary";
+import { lessons } from "@/data/mock-data";
 
 export function ProgressScreen() {
   const { data, live } = useDemo();
+  const lessonsDone =
+    data.lessonsCompleted?.length ?? (data.lessonCompleted ? 1 : 0);
   const wallet = useWallet();
   const [tab, setTab] = useState<"history" | "earn">("history");
   const [showAll, setShowAll] = useState(false);
@@ -172,10 +175,27 @@ export function ProgressScreen() {
                 </div>
               ))}
             </div>
-            <Link className="text-link chart-reflection-link" href="/reflexion">
-              Explorar mi reflexión semanal
-              <ArrowRight size={15} />
-            </Link>
+            <div className="progress-links">
+              <Link className="text-link" href="/constancia">
+                Ver mi constancia (día, semana, mes)
+                <ArrowRight size={15} />
+              </Link>
+              <Link className="text-link" href="/historial">
+                Ver mi historial completo
+                <ArrowRight size={15} />
+              </Link>
+              <Link className="text-link" href="/mis-recompensas">
+                Ver mis recompensas
+                <ArrowRight size={15} />
+              </Link>
+              <Link
+                className="text-link chart-reflection-link"
+                href="/reflexion"
+              >
+                Explorar mi reflexión semanal
+                <ArrowRight size={15} />
+              </Link>
+            </div>
           </Card>
           <section>
             <SectionHeading
@@ -193,8 +213,8 @@ export function ProgressScreen() {
             <div className="goals-grid">
               <Metric
                 title="Aprender algo nuevo"
-                subtitle={`${data.lessonCompleted ? 1 : 0}/1 microlección completada`}
-                value={data.lessonCompleted ? 100 : 0}
+                subtitle={`${lessonsDone}/${lessons.length} microlecciones completadas`}
+                value={(lessonsDone / lessons.length) * 100}
                 icon={BookOpen}
               />
               <Metric

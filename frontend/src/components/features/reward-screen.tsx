@@ -129,7 +129,11 @@ export function RewardScreen() {
                 ? "Registra una decisión o completa una microlección."
                 : grant.reason === "registro"
                   ? "Observaste una decisión y cómo te sentiste."
-                  : "Aprendiste algo nuevo sobre tus decisiones."}
+                  : grant.reason === "semanal"
+                    ? `Bono por tu constancia: ${grant.label ?? "esta semana"}.`
+                    : grant.reason === "mensual"
+                      ? `Bono por tu constancia: ${grant.label ?? "este mes"}.`
+                      : "Aprendiste algo nuevo sobre tus decisiones."}
             </p>
           </div>
         </div>
@@ -151,7 +155,9 @@ export function RewardScreen() {
               </span>
             </div>
             <div className="reward-value">
-              {live ? "1 DOWN" : "1 crédito"}
+              {live
+                ? `${grant?.units ?? 1} DOWN`
+                : `${grant?.units ?? 1} ${(grant?.units ?? 1) === 1 ? "crédito" : "créditos"}`}
               <span>
                 <Coins size={29} />
               </span>

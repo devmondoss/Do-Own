@@ -18,17 +18,13 @@ import {
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { decisionDate, recentDecisions } from "@/lib/decision-summary";
+import { emotionLabels } from "@/lib/labels";
 
 const categories = [
   { id: "antojo", label: "Antojo", tone: "violet" as const },
   { id: "habitual", label: "Lo de siempre", tone: "amber" as const },
   { id: "ahorro", label: "Guardé", tone: "mint" as const },
 ];
-const emotionLabels = {
-  tranquilo: "Tranquilo",
-  estres: "Estrés",
-  rutina: "Rutina",
-};
 const dateLabel = (value: string) =>
   new Intl.DateTimeFormat("es-MX", {
     dateStyle: "medium",

@@ -4,6 +4,7 @@ import { forwardRef, useState } from "react";
 import { Copy, KeyRound, LogOut, TriangleAlert, X } from "lucide-react";
 import { Button, IconTile } from "./primitives";
 import { useWallet } from "@/providers/wallet-provider";
+import { clearAllEvidence } from "@/lib/evidence-store";
 
 // Everything Do-Own keeps on this device. Signing out removes all of it.
 const DEVICE_KEYS = [
@@ -47,6 +48,8 @@ export const LogoutDialog = forwardRef<HTMLDialogElement>(
           /* ignore */
         }
       }
+      // Evidence photos live in IndexedDB on this device.
+      clearAllEvidence();
       // Full reload so every provider starts from a clean state.
       window.location.replace("/bienvenida");
     }

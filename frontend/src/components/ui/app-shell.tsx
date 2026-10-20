@@ -14,6 +14,9 @@ import {
   Star,
   X,
   CalendarDays,
+  Flame,
+  Gift,
+  History,
   Wallet,
 } from "lucide-react";
 import { Brand, cn } from "./primitives";
@@ -28,11 +31,23 @@ const destinations = [
   { href: "/progreso", label: "Recompensas", icon: Star },
 ];
 
+// Pages reached from "Recompensas" on mobile keep that tab highlighted.
+const SUB_PAGES = [
+  "/cuenta",
+  "/reflexion",
+  "/historial",
+  "/constancia",
+  "/mis-recompensas",
+];
+
 export function BottomNavigation({ desktop = false }: { desktop?: boolean }) {
   const pathname = usePathname();
   const items = desktop
     ? [
         ...destinations,
+        { href: "/historial", label: "Mi historial", icon: History },
+        { href: "/constancia", label: "Mi constancia", icon: Flame },
+        { href: "/mis-recompensas", label: "Mis recompensas", icon: Gift },
         { href: "/reflexion", label: "Mi semana", icon: CalendarDays },
         { href: "/cuenta", label: "Mi cuenta", icon: Wallet },
       ]
@@ -48,9 +63,7 @@ export function BottomNavigation({ desktop = false }: { desktop?: boolean }) {
           href={href}
           aria-current={
             pathname === href ||
-            (!desktop &&
-              href === "/progreso" &&
-              ["/cuenta", "/reflexion"].includes(pathname))
+            (!desktop && href === "/progreso" && SUB_PAGES.includes(pathname))
               ? "page"
               : undefined
           }
@@ -59,7 +72,7 @@ export function BottomNavigation({ desktop = false }: { desktop?: boolean }) {
             (pathname === href ||
               (!desktop &&
                 href === "/progreso" &&
-                ["/cuenta", "/reflexion"].includes(pathname))) &&
+                SUB_PAGES.includes(pathname))) &&
               "nav-active",
           )}
         >

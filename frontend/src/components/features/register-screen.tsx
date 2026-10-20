@@ -26,6 +26,7 @@ import {
 import { useDemo } from "@/providers/demo-provider";
 import { handleAnalizarFoto, handleGuardarDecision } from "@/lib/integrations";
 import type { DecisionCategory, Emotion } from "@/types/do-own";
+import { emotionOptions } from "@/lib/labels";
 
 const categories = [
   {
@@ -47,30 +48,13 @@ const categories = [
     icon: PiggyBank,
   },
 ];
-const emotions = [
-  {
-    value: "tranquilo" as const,
-    title: "Tranquilo",
-    subtitle: "Satisfecho",
-    emoji: "😊",
-  },
-  {
-    value: "estres" as const,
-    title: "Estrés",
-    subtitle: "O culpa",
-    emoji: "🙁",
-  },
-  {
-    value: "rutina" as const,
-    title: "Rutina",
-    subtitle: "Neutro",
-    emoji: "😌",
-  },
-];
+const emotions = emotionOptions;
 
 export function RegisterScreen() {
   const router = useRouter();
   const { saveDecision, notify, live } = useDemo();
+  const [item, setItem] = useState("");
+  const [itemError, setItemError] = useState("");
   const [amount, setAmount] = useState("250.00");
   const [category, setCategory] = useState<DecisionCategory>("antojo");
   const [emotion, setEmotion] = useState<Emotion>("tranquilo");
@@ -103,19 +87,26 @@ export function RegisterScreen() {
   }
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const itemMissing = !item.trim();
     const normalized = amount.trim().replace(",", ".");
-    if (
+    const amountBad =
       !/^\d+(\.\d{1,2})?$/.test(normalized) ||
       Number(normalized) <= 0 ||
-      Number(normalized) > 999999999
-    ) {
-      setError(
-        "Ingresa un monto mayor a 0, con un máximo de 2 decimales y hasta 999,999,999 MXN.",
-      );
+      Number(normalized) > 999999999;
+    setItemError(
+      itemMissing ? "Escribe qué compraste o en qué fue tu decisión." : "",
+    );
+    setError(
+      amountBad
+        ? "Ingresa un monto mayor a 0, con un máximo de 2 decimales y hasta 999,999,999 MXN."
+        : "",
+    );
+    if (itemMissing || amountBad) {
+      document.getElementById(itemMissing ? "item" : "amount")?.focus();
       return;
     }
-    setError("");
     const input = {
+      item: item.trim(),
       amount: normalized,
       currency: "MXN" as const,
       category,
@@ -196,8 +187,32 @@ export function RegisterScreen() {
             <p className="field-hint">
               {photo
                 ? "Foto lista. Confirma el monto y la categoría manualmente: la lectura automática aún no está conectada."
-                : "JPG, PNG o WebP · hasta 10 MB. La foto no se sube en esta demo."}
+                : "JPG, PNG o WebP · hasta 10 MB. La foto se guarda solo en este teléfono."}
             </p>
+          </section>
+          <section className="item-card">
+            <label htmlFor="item" className="eyebrow">
+              ¿QUÉ COMPRASTE?
+            </label>
+            <input
+              id="item"
+              name="item"
+              autoComplete="off"
+              maxLength={80}
+              value={item}
+              onChange={(e) => {
+                setItem(e.target.value);
+                if (itemError) setItemError("");
+              }}
+              placeholder="Café, despensa, pasaje…"
+              aria-invalid={!!itemError}
+              aria-describedby={itemError ? "item-error" : undefined}
+            />
+            {itemError && (
+              <p className="field-error" id="item-error" role="alert">
+                {itemError}
+              </p>
+            )}
           </section>
           <section className="amount-card">
             <label htmlFor="amount" className="eyebrow">

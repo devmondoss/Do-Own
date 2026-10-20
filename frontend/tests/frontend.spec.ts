@@ -10,6 +10,9 @@ const routes = [
   "comprobante",
   "cuenta",
   "reflexion",
+  "historial",
+  "constancia",
+  "mis-recompensas",
 ];
 
 async function completeLesson(page: Page) {
@@ -36,7 +39,7 @@ async function completeLesson(page: Page) {
   await expect(dialog).not.toBeVisible();
 }
 
-test("nine routes render without JavaScript errors or horizontal overflow", async ({
+test("twelve routes render without JavaScript errors or horizontal overflow", async ({
   page,
 }) => {
   const errors: string[] = [];
@@ -85,6 +88,7 @@ test("photo, validated decision, immediate reward and weekly reflection share st
   await page.getByRole("button", { name: "Guardar decisión" }).click();
   await expect(page.locator("#amount-error")).toContainText("mayor a 0");
   await page.getByLabel("Monto en pesos mexicanos").fill("350,50");
+  await page.getByLabel(/qué compraste/i).fill("Despensa de la semana");
   await page.getByRole("radio", { name: "Guardé Ahorro" }).check();
   await page.getByRole("radio", { name: "Rutina Neutro" }).check();
   await page
@@ -122,6 +126,7 @@ test("a lesson earns an additional reward, while repeating it earns none", async
   page,
 }) => {
   await page.goto("/registro");
+  await page.getByLabel(/qué compraste/i).fill("Un café");
   await page.getByRole("button", { name: "Guardar decisión" }).click();
   await page.getByRole("button", { name: "Recibir mi recompensa" }).click();
   await page
@@ -261,4 +266,44 @@ test("manifest, service worker and offline fallback", async ({
     page.getByRole("heading", { name: "Una pequeña pausa." }),
   ).toBeVisible();
   await context.setOffline(false);
+});
+
+test("history, constancy and rewards explain the person's own records", async ({
+  page,
+}) => {
+  await page.goto("/registro");
+  await page.getByLabel(/qué compraste/i).fill("Tacos con amigos");
+  await page.getByLabel("Monto en pesos mexicanos").fill("120");
+  await page.getByRole("radio", { name: /Alegría/ }).check();
+  await page.getByRole("button", { name: "Guardar decisión" }).click();
+  await expect(page).toHaveURL(/\/recompensa$/);
+
+  // Demo mode keeps state in memory, so navigate with links (no reloads).
+  await page.getByRole("button", { name: "Recibir mi recompensa" }).click();
+  await page.getByRole("link", { name: "Volver a mi progreso" }).click();
+  await page.getByRole("link", { name: /Ver mi historial completo/ }).click();
+  await expect(
+    page.locator(".history-item").filter({ hasText: "Tacos con amigos" }),
+  ).toContainText("$120.00");
+  await page.getByRole("button", { name: "Guardé", exact: true }).click();
+  await expect(
+    page.locator(".history-item").filter({ hasText: "Tacos con amigos" }),
+  ).toHaveCount(0);
+
+  await page
+    .getByRole("navigation", { name: "Navegación principal" })
+    .getByRole("link", { name: "Recompensas" })
+    .click();
+  await page.getByRole("link", { name: /Ver mi constancia/ }).click();
+  await page.getByRole("tab", { name: "Mes" }).click();
+  await expect(page.getByRole("grid")).toBeVisible();
+  await page.getByRole("tab", { name: "Día" }).click();
+  await expect(
+    page.locator(".check-done").filter({ hasText: "Registrar una decisión" }),
+  ).toBeVisible();
+
+  await page.getByRole("link", { name: "Ver mis recompensas →" }).click();
+  await expect(page.locator(".reward-claimed").first()).toBeVisible();
+  await expect(page.getByText("Bono semanal · 3")).toBeVisible();
+  await expect(page.getByText("¿Cómo se calculan?")).toBeVisible();
 });

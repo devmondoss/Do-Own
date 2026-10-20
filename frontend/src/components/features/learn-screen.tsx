@@ -30,19 +30,28 @@ import {
   SectionHeading,
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
-import { lessonQuestions, lessonSteps } from "@/data/mock-data";
+import { lessons } from "@/data/mock-data";
 import { handleCompletarLeccion } from "@/lib/integrations";
 
 export function LearnScreen() {
   const { data, completeLesson, notify } = useDemo();
   const dialog = useRef<HTMLDialogElement>(null);
+  const [activeId, setActiveId] = useState(lessons[0].id);
+  const lesson = lessons.find((l) => l.id === activeId) ?? lessons[0];
+  const lessonSteps = lesson.steps;
+  const lessonQuestions = lesson.questions;
+  const totalSteps = lessonSteps.length + lessonQuestions.length;
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>([null, null]);
   const questionIndex = step - lessonSteps.length;
   const question = lessonQuestions[questionIndex];
   const answer = answers[questionIndex];
   const correct = !!question && answer === question.correctIndex;
-  function openLesson() {
+  const isDone = (id: string) =>
+    !!data.lessonsCompleted?.includes(id) ||
+    (id === "antojo-v1" && data.lessonCompleted);
+  function openLesson(id = lessons[0].id) {
+    setActiveId(id);
     setStep(0);
     setAnswers([null, null]);
     dialog.current?.showModal();
@@ -51,12 +60,13 @@ export function LearnScreen() {
     handleCompletarLeccion();
     // DEMO(UI): a repeat lesson never creates another reward in memory.
     // TODO(BACKEND): validate all answers before awarding the real completion.
-    completeLesson();
+    const repeat = isDone(lesson.id);
+    completeLesson(lesson.id);
     dialog.current?.close();
     notify(
-      data.lessonCompleted
+      repeat
         ? "Repaso completado. Sigue observando a tu ritmo."
-        : "¡Microlección completada! Tienes una recompensa adicional en la demo.",
+        : "¡Microlección completada! Tienes una recompensa disponible.",
     );
   }
   return (
@@ -126,24 +136,46 @@ export function LearnScreen() {
             se relaciona con esa decisión.
           </p>
         )}
-        <Button className="full-width" onClick={openLesson}>
+        <Button
+          className="full-width"
+          onClick={() => openLesson(lessons[0].id)}
+        >
           {data.lessonCompleted ? "Repasar lección" : "Comenzar lección"}
           {data.lessonCompleted ? <Check size={18} /> : <Play size={17} />}
         </Button>
       </Card>
       <section className="upcoming-section">
         <SectionHeading
-          aside={<span className="subtle-caption">Próximamente</span>}
+          aside={
+            <span className="subtle-caption">
+              {lessons.filter((l) => isDone(l.id)).length}/{lessons.length}{" "}
+              completadas
+            </span>
+          }
         >
-          Próximas lecciones
+          Más lecciones
         </SectionHeading>
         <div className="upcoming-lessons">
-          <UpcomingLesson
-            icon={Brain}
-            category="Tus decisiones"
-            title="Reconocer momentos y emociones"
-            text="Observa cuándo aparecen tus decisiones habituales"
-          />
+          {lessons.slice(1).map((l) => (
+            <article key={l.id} className="upcoming-card lesson-available">
+              <IconTile
+                icon={l.category === "ahorro" ? Wallet : Brain}
+                tone="violet"
+              />
+              <div>
+                <Badge tone="mint">{l.badge}</Badge>
+                <h3>{l.title}</h3>
+                <p>{l.summary}</p>
+              </div>
+              <Button
+                variant={isDone(l.id) ? "quiet" : "primary"}
+                onClick={() => openLesson(l.id)}
+                aria-label={`${isDone(l.id) ? "Repasar" : "Comenzar"}: ${l.title}`}
+              >
+                {isDone(l.id) ? <Check size={17} /> : <Play size={16} />}
+              </Button>
+            </article>
+          ))}
           <UpcomingLesson
             icon={Wallet}
             category="Tu cuenta digital"
@@ -158,7 +190,7 @@ export function LearnScreen() {
       </section>
       <dialog
         ref={dialog}
-        aria-label="Microlección de Antojos"
+        aria-label={lesson.dialogLabel}
         className="lesson-dialog"
       >
         <div className="lesson-dialog-header">
@@ -175,10 +207,12 @@ export function LearnScreen() {
           </button>
         </div>
         <ProgressBar
-          value={((step + 1) / 4) * 100}
+          value={((step + 1) / totalSteps) * 100}
           label="Avance de la microlección"
         />
-        <span className="lesson-step-count">PASO {step + 1} DE 4</span>
+        <span className="lesson-step-count">
+          PASO {step + 1} DE {totalSteps}
+        </span>
         {step < lessonSteps.length ? (
           <>
             <IconTile icon={Lightbulb} />
@@ -204,7 +238,9 @@ export function LearnScreen() {
         ) : (
           <>
             <IconTile icon={Brain} tone="mint" />
-            <h2>Pregunta {questionIndex + 1} de 2</h2>
+            <h2>
+              Pregunta {questionIndex + 1} de {lessonQuestions.length}
+            </h2>
             <p>{question.title}</p>
             <div className="quiz-options quiz-answers">
               {question.options.map((option, index) => (
@@ -232,9 +268,7 @@ export function LearnScreen() {
                 className={correct ? "quiz-correct" : "quiz-hint"}
                 role="status"
               >
-                {correct
-                  ? "Así es. Observar sin juzgar te ayuda a reconocer tus propios patrones."
-                  : "Vuelve a intentarlo: registrar una decisión no es juzgarla, es empezar a verla."}
+                {correct ? lesson.correctFeedback : lesson.wrongFeedback}
               </p>
             )}
             <div className="lesson-dialog-actions">
