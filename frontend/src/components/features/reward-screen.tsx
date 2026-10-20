@@ -6,7 +6,6 @@ import {
   ArrowRight,
   Check,
   ExternalLink,
-  Loader2,
   CheckCircle2,
   Coins,
   Gift,
@@ -20,6 +19,7 @@ import { Badge, Button, ButtonLink } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { handleReclamar } from "@/lib/integrations";
 import { useWallet } from "@/providers/wallet-provider";
+import { ClaimConfirmDialog } from "@/components/ui/claim-confirm-dialog";
 
 export function RewardScreen() {
   const { data, claimDemoReward, notify } = useDemo();
@@ -28,6 +28,7 @@ export function RewardScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [confirming, setConfirming] = useState(false);
   const grant =
     data.rewards.find((reward) => reward.id === selectedId) ||
     data.rewards.find((reward) => reward.status === "available") ||
@@ -44,6 +45,7 @@ export function RewardScreen() {
     if (!live) {
       // DEMO(UI): memory-only balance when the server has no network config.
       claimDemoReward(grant.id);
+      setConfirming(false);
       notify(
         "Sumaste una recompensa de demostración. No se realizó una transferencia real.",
       );
@@ -56,6 +58,7 @@ export function RewardScreen() {
       // confirmed transaction before marking the reward as received.
       await wallet.claim(grant.id);
       claimDemoReward(grant.id);
+      setConfirming(false);
       notify("¡Listo! Tu recompensa ya está en tu cuenta digital.");
     } catch (e) {
       setError(
@@ -272,22 +275,15 @@ export function RewardScreen() {
         ) : (
           <>
             <Button
-              onClick={claim}
+              onClick={() => {
+                setError("");
+                setConfirming(true);
+              }}
               className="full-width"
               disabled={busy}
-              aria-busy={busy}
             >
-              {busy ? (
-                <>
-                  Enviando a tu cuenta…
-                  <Loader2 size={19} className="spin" />
-                </>
-              ) : (
-                <>
-                  Recibir mi recompensa
-                  <ArrowRight size={19} />
-                </>
-              )}
+              Recibir mi recompensa
+              <ArrowRight size={19} />
             </Button>
             <Link href="/inicio" className="later-link">
               Hacerlo más tarde
@@ -298,6 +294,19 @@ export function RewardScreen() {
           Volver a mi progreso
         </Link>
       </footer>
+      <ClaimConfirmDialog
+        reward={confirming && grant && !claimed ? grant : null}
+        live={live}
+        account={
+          wallet.publicKey
+            ? `${wallet.publicKey.slice(0, 4)}…${wallet.publicKey.slice(-4)}`
+            : undefined
+        }
+        busy={busy}
+        error={error}
+        onConfirm={claim}
+        onClose={() => setConfirming(false)}
+      />
     </main>
   );
 }

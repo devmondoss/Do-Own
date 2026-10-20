@@ -27,7 +27,12 @@ import {
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { getEvidence } from "@/lib/evidence-store";
-import { categoryLabels, emotionEmoji, emotionLabels } from "@/lib/labels";
+import {
+  categoryLabels,
+  emotionEmoji,
+  emotionLabels,
+  formatMoney,
+} from "@/lib/labels";
 import { decisionDate } from "@/lib/decision-summary";
 import { monthName, weekdayOf } from "@/lib/periods";
 import type { DecisionCategory, DecisionRecord, Emotion } from "@/types/do-own";
@@ -54,9 +59,6 @@ const dayTitle = (iso: string) =>
     month: "long",
     timeZone: "America/Mexico_City",
   }).format(new Date(iso));
-const money = (amount: string) =>
-  `$${Number(amount).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
 /** F03: patterns only when there is enough data, phrased as observations. */
 function patterns(records: DecisionRecord[]) {
   if (records.length < 5) return [];
@@ -293,7 +295,7 @@ export function HistoryScreen() {
                         {r.note && <p>{r.note}</p>}
                       </div>
                       <strong className="history-amount">
-                        {money(r.amount)}
+                        {formatMoney(r.amount, r.currency)}
                       </strong>
                     </div>
                     <div className="history-evidence">

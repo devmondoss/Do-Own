@@ -15,6 +15,15 @@ const routes = [
   "mis-recompensas",
 ];
 
+/** H6: the reward is only delivered after the person reviews and accepts it. */
+async function claimReward(page: Page) {
+  await page.getByRole("button", { name: "Recibir mi recompensa" }).click();
+  const dialog = page.getByRole("dialog", { name: "Confirma tu recompensa" });
+  await expect(dialog).toContainText("Costo para ti");
+  await dialog.getByRole("button", { name: "Aceptar y recibir" }).click();
+  await expect(dialog).toBeHidden();
+}
+
 async function completeLesson(page: Page) {
   await page
     .getByRole("button", { name: /Comenzar lección|Repasar lección/ })
@@ -96,7 +105,7 @@ test("photo, validated decision, immediate reward and weekly reflection share st
     .fill("Registro de prueba semanal");
   await page.getByRole("button", { name: "Guardar decisión" }).click();
   await expect(page).toHaveURL(/\/recompensa$/);
-  await page.getByRole("button", { name: "Recibir mi recompensa" }).click();
+  await claimReward(page);
   await expect(
     page.getByRole("button", { name: "Recompensa demo reclamada" }),
   ).toBeDisabled();
@@ -127,14 +136,18 @@ test("a lesson earns an additional reward, while repeating it earns none", async
 }) => {
   await page.goto("/registro");
   await page.getByLabel(/qué compraste/i).fill("Un café");
+  await page
+    .getByLabel("Agregar foto de tu decisión")
+    .setInputFiles("public/icons/icon-192.png");
+  await page.getByLabel("Monto en pesos mexicanos").fill("45");
   await page.getByRole("button", { name: "Guardar decisión" }).click();
-  await page.getByRole("button", { name: "Recibir mi recompensa" }).click();
+  await claimReward(page);
   await page
     .getByRole("link", { name: "Aprender y sumar otra recompensa" })
     .click();
   await completeLesson(page);
   await page.getByRole("link", { name: /Ver mi recompensa →/ }).click();
-  await page.getByRole("button", { name: "Recibir mi recompensa" }).click();
+  await claimReward(page);
   await page.getByRole("link", { name: "Volver a mi progreso" }).click();
   await expect(page.locator(".balance-number")).toHaveText("127créditos");
   await page
@@ -273,13 +286,16 @@ test("history, constancy and rewards explain the person's own records", async ({
 }) => {
   await page.goto("/registro");
   await page.getByLabel(/qué compraste/i).fill("Tacos con amigos");
+  await page
+    .getByLabel("Agregar foto de tu decisión")
+    .setInputFiles("public/icons/icon-192.png");
   await page.getByLabel("Monto en pesos mexicanos").fill("120");
   await page.getByRole("radio", { name: /Alegría/ }).check();
   await page.getByRole("button", { name: "Guardar decisión" }).click();
   await expect(page).toHaveURL(/\/recompensa$/);
 
   // Demo mode keeps state in memory, so navigate with links (no reloads).
-  await page.getByRole("button", { name: "Recibir mi recompensa" }).click();
+  await claimReward(page);
   await page.getByRole("link", { name: "Volver a mi progreso" }).click();
   await page.getByRole("link", { name: /Ver mi historial completo/ }).click();
   await expect(
@@ -306,4 +322,39 @@ test("history, constancy and rewards explain the person's own records", async ({
   await expect(page.locator(".reward-claimed").first()).toBeVisible();
   await expect(page.getByText("Bono semanal · 3")).toBeVisible();
   await expect(page.getByText("¿Cómo se calculan?")).toBeVisible();
+});
+
+test("a record needs photo and amount, and can be in dollars", async ({
+  page,
+}) => {
+  await page.goto("/registro");
+  await page.getByLabel(/qué compraste/i).fill("Libro");
+  await page.getByRole("button", { name: "Guardar decisión" }).click();
+  await expect(page).toHaveURL(/\/registro$/);
+  await expect(page.getByText("Agrega una foto de tu compra")).toBeVisible();
+  await expect(page.locator("#amount-error")).toContainText("cuánto gastaste");
+
+  await page
+    .getByLabel("Agregar foto de tu decisión")
+    .setInputFiles("public/icons/icon-192.png");
+  await page.getByRole("radio", { name: /USD/ }).check();
+  await page.getByLabel("Monto en dólares estadounidenses").fill("12.5");
+  await page.getByRole("button", { name: "Guardar decisión" }).click();
+  await expect(page).toHaveURL(/\/recompensa$/);
+
+  // "Ahora no" keeps the reward pending: nothing is delivered without consent.
+  await page.getByRole("button", { name: "Recibir mi recompensa" }).click();
+  await page
+    .getByRole("dialog", { name: "Confirma tu recompensa" })
+    .getByRole("button", { name: "Ahora no" })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Recibir mi recompensa" }),
+  ).toBeEnabled();
+  await claimReward(page);
+  await page.getByRole("link", { name: "Volver a mi progreso" }).click();
+  await page.getByRole("link", { name: /Ver mi historial completo/ }).click();
+  await expect(
+    page.locator(".history-item").filter({ hasText: "Libro" }),
+  ).toContainText("$12.50 USD");
 });

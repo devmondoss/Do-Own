@@ -1,4 +1,4 @@
-import type { DecisionCategory, Emotion } from "@/types/do-own";
+import type { Currency, DecisionCategory, Emotion } from "@/types/do-own";
 
 export const categoryLabels: Record<DecisionCategory, string> = {
   antojo: "Antojo",
@@ -31,3 +31,19 @@ export const emotionLabels = Object.fromEntries(
 export const emotionEmoji = Object.fromEntries(
   emotionOptions.map((e) => [e.value, e.emoji]),
 ) as Record<Emotion, string>;
+
+export const currencyNames: Record<Currency, string> = {
+  MXN: "pesos mexicanos",
+  USD: "dólares estadounidenses",
+};
+
+/** "$350.50 MXN" / "$12.00 USD" — always shows the currency code. */
+export function formatMoney(
+  amount: string | number,
+  currency: Currency = "MXN",
+) {
+  return `$${Number(amount).toLocaleString("es-MX", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} ${currency}`;
+}

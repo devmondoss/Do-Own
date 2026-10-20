@@ -124,7 +124,7 @@ export const lessons: Lesson[] = [
     ],
     questions: [
       {
-        title: "¿Qué significa registrar una compra como Antojo?",
+        title: "¿Qué significa registrar una compra como “Antojo”?",
         options: [
           "Que hiciste algo incorrecto con tu dinero",
           "Que fue una decisión guiada por un impulso del momento, ni buena ni mala",
@@ -137,7 +137,7 @@ export const lessons: Lesson[] = [
         options: [
           "Para que la app te lo recuerde y te sientas mal",
           "Para ver con el tiempo si hay un patrón detrás, sin juzgarlo todavía",
-          "Para ganar menos puntos que con Guardé",
+          "Para ganar menos puntos que con “Guardé”",
         ],
         correctIndex: 1,
       },
@@ -224,7 +224,7 @@ export const lessons: Lesson[] = [
         correctIndex: 1,
       },
       {
-        title: "¿Qué significa ahorrar 'primero para ti'?",
+        title: "¿Qué significa ahorrar “primero para ti”?",
         options: [
           "Apartar una parte al recibir tu dinero, antes de gastar",
           "Ahorrar solo lo que sobra al final del mes",

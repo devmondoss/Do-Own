@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { useWallet } from "@/providers/wallet-provider";
+import { ClaimConfirmDialog } from "@/components/ui/claim-confirm-dialog";
 import {
   MONTH_RULE,
   WEEK_RULE,
@@ -76,6 +77,7 @@ export function MyRewardsScreen() {
   const { data, live, claimDemoReward, notify } = useDemo();
   const wallet = useWallet();
   const [busy, setBusy] = useState<string | null>(null);
+  const [pending, setPending] = useState<DemoReward | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const unit = wallet.enabled ? "DOWN" : "créditos";
   const today = todayKey();
@@ -102,6 +104,7 @@ export function MyRewardsScreen() {
     try {
       if (live && wallet.enabled) await wallet.claim(reward.id);
       claimDemoReward(reward.id);
+      setPending(null);
       notify(`Recibiste ${reward.units} ${unit}.`);
     } catch (e) {
       setErrors((current) => ({
@@ -158,7 +161,10 @@ export function MyRewardsScreen() {
                     )}
                   </div>
                   <Button
-                    onClick={() => claim(r)}
+                    onClick={() => {
+                      setErrors((e) => ({ ...e, [r.id]: "" }));
+                      setPending(r);
+                    }}
                     disabled={!!busy}
                     aria-busy={busy === r.id}
                   >
@@ -293,6 +299,20 @@ export function MyRewardsScreen() {
           </div>
         )}
       </section>
+
+      <ClaimConfirmDialog
+        reward={pending}
+        live={live && wallet.enabled}
+        account={
+          wallet.publicKey
+            ? `${wallet.publicKey.slice(0, 4)}…${wallet.publicKey.slice(-4)}`
+            : undefined
+        }
+        busy={!!pending && busy === pending.id}
+        error={pending ? errors[pending.id] : undefined}
+        onConfirm={() => pending && claim(pending)}
+        onClose={() => setPending(null)}
+      />
 
       <details className="technical-details">
         <summary>

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   Check,
   CheckCircle2,
-  ChevronDown,
   IceCreamBowl,
   LockKeyhole,
   NotebookPen,
@@ -25,8 +24,8 @@ import {
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { handleAnalizarFoto, handleGuardarDecision } from "@/lib/integrations";
-import type { DecisionCategory, Emotion } from "@/types/do-own";
-import { emotionOptions } from "@/lib/labels";
+import type { Currency, DecisionCategory, Emotion } from "@/types/do-own";
+import { currencyNames, emotionOptions } from "@/lib/labels";
 
 const categories = [
   {
@@ -55,7 +54,8 @@ export function RegisterScreen() {
   const { saveDecision, notify, live } = useDemo();
   const [item, setItem] = useState("");
   const [itemError, setItemError] = useState("");
-  const [amount, setAmount] = useState("250.00");
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState<Currency>("MXN");
   const [category, setCategory] = useState<DecisionCategory>("antojo");
   const [emotion, setEmotion] = useState<Emotion>("tranquilo");
   const [note, setNote] = useState("");
@@ -88,6 +88,7 @@ export function RegisterScreen() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const itemMissing = !item.trim();
+    const photoMissing = !photo;
     const normalized = amount.trim().replace(",", ".");
     const amountBad =
       !/^\d+(\.\d{1,2})?$/.test(normalized) ||
@@ -98,17 +99,26 @@ export function RegisterScreen() {
     );
     setError(
       amountBad
-        ? "Ingresa un monto mayor a 0, con un máximo de 2 decimales y hasta 999,999,999 MXN."
+        ? "Escribe cuánto gastaste: un monto mayor a 0, con hasta 2 decimales."
         : "",
     );
-    if (itemMissing || amountBad) {
-      document.getElementById(itemMissing ? "item" : "amount")?.focus();
+    setPhotoError(
+      photoMissing
+        ? "Agrega una foto de tu compra o ticket: es la evidencia de tu registro."
+        : "",
+    );
+    if (photoMissing || itemMissing || amountBad) {
+      if (photoMissing)
+        document
+          .querySelector(".photo-capture")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      else document.getElementById(itemMissing ? "item" : "amount")?.focus();
       return;
     }
     const input = {
       item: item.trim(),
       amount: normalized,
-      currency: "MXN" as const,
+      currency,
       category,
       emotion,
       note: note.trim(),
@@ -143,7 +153,9 @@ export function RegisterScreen() {
               <IconTile icon={Camera} />
               <div>
                 <h2>Observa tu decisión</h2>
-                <p>Agrega una foto o registra los datos manualmente.</p>
+                <p>
+                  Toma una foto de tu compra o ticket y anota cuánto gastaste.
+                </p>
               </div>
             </div>
             <label className="photo-picker">
@@ -151,7 +163,10 @@ export function RegisterScreen() {
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 capture="environment"
+                id="photo-input"
                 aria-label="Agregar foto de tu decisión"
+                aria-required="true"
+                aria-invalid={!!photoError}
                 onChange={selectPhoto}
               />
               <Camera size={20} />
@@ -187,7 +202,7 @@ export function RegisterScreen() {
             <p className="field-hint">
               {photo
                 ? "Foto lista. Confirma el monto y la categoría manualmente: la lectura automática aún no está conectada."
-                : "JPG, PNG o WebP · hasta 10 MB. La foto se guarda solo en este teléfono."}
+                : "Obligatoria: foto de tu compra o ticket (JPG, PNG o WebP, hasta 10 MB). Se guarda solo en este teléfono."}
             </p>
           </section>
           <section className="item-card">
@@ -233,15 +248,30 @@ export function RegisterScreen() {
                 }}
                 aria-describedby={error ? "amount-error" : "amount-hint"}
                 aria-invalid={!!error}
-                aria-label="Monto en pesos mexicanos"
+                aria-label={`Monto en ${currencyNames[currency]}`}
+                placeholder="0.00"
               />
-              <span className="currency-label">MXN</span>
+              <span className="currency-label">{currency}</span>
             </div>
-            <span id="amount-hint" className="account-currency">
-              <i className="status-dot" />
-              Cuenta principal (MXN)
-              <ChevronDown size={14} />
-            </span>
+            <div
+              className="currency-switch"
+              role="radiogroup"
+              aria-label="Moneda"
+              id="amount-hint"
+            >
+              {(["MXN", "USD"] as const).map((c) => (
+                <label key={c} className={currency === c ? "is-selected" : ""}>
+                  <input
+                    type="radio"
+                    name="currency"
+                    value={c}
+                    checked={currency === c}
+                    onChange={() => setCurrency(c)}
+                  />
+                  {c} · {c === "MXN" ? "Pesos" : "Dólares"}
+                </label>
+              ))}
+            </div>
           </section>
           {error && (
             <p className="field-error" id="amount-error" role="alert">
