@@ -358,3 +358,37 @@ test("a record needs photo and amount, and can be in dollars", async ({
     page.locator(".history-item").filter({ hasText: "Libro" }),
   ).toContainText("$12.50 USD");
 });
+
+test("all registered amounts stay visible, and the balance is always at hand", async ({
+  page,
+}) => {
+  await page.goto("/registro");
+  await page.getByLabel(/qué compraste/i).fill("Gasolina");
+  await page.getByLabel("Monto en pesos mexicanos").fill("500");
+  // A reload (e.g. Android closing the page while the camera is open)
+  // keeps what was already written.
+  await page.reload();
+  await expect(page.getByLabel(/qué compraste/i)).toHaveValue("Gasolina");
+  await expect(page.getByLabel("Monto en pesos mexicanos")).toHaveValue("500");
+  await page
+    .getByLabel("Agregar foto de tu decisión")
+    .setInputFiles("public/icons/icon-192.png");
+  await page.getByRole("button", { name: "Guardar decisión" }).click();
+  await expect(page).toHaveURL(/\/recompensa$/);
+  await claimReward(page);
+  await page.getByRole("link", { name: "Volver a mi progreso" }).click();
+  await expect(page.locator(".amounts-summary")).toContainText("Gasolina");
+
+  await page
+    .getByRole("navigation", { name: "Navegación principal" })
+    .getByRole("link", { name: "Historial" })
+    .click();
+  const summary = page.locator(".amounts-summary");
+  await expect(summary).toContainText("Total registrado");
+  await expect(
+    page.locator(".history-item").filter({ hasText: "Gasolina" }),
+  ).toContainText("$500.00 MXN");
+  await expect(page.locator(".balance-chip")).toContainText("créditos");
+  await page.locator(".balance-chip").click();
+  await expect(page).toHaveURL(/\/mis-recompensas$/);
+});

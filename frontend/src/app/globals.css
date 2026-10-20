@@ -4317,7 +4317,7 @@ button:disabled {
 .cal-missed .cal-dot,
 .month-cell.cal-missed {
   background: #ece9f3;
-  color: #8a83a0;
+  color: #5e5878;
 }
 .cal-future .cal-dot,
 .month-cell.cal-future {
@@ -4341,7 +4341,7 @@ button:disabled {
 }
 .month-head {
   font-size: 0.75rem;
-  color: #8a83a0;
+  color: #5e5878;
   font-weight: 700;
 }
 .bonus-progress {
@@ -4571,4 +4571,120 @@ button:disabled {
 }
 .item-card .field-error {
   margin-top: 8px;
+}
+.balance-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #efe9ff;
+  color: #5b21b6;
+  font-weight: 700;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.balance-chip:hover {
+  background: #e4dbff;
+}
+.amounts-summary {
+  display: grid;
+  gap: 14px;
+}
+.amounts-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.amounts-head h2 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+.amounts-head p {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: #5e5878;
+}
+.amounts-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0;
+}
+.amounts-totals > div {
+  background: #f6f3ff;
+  border-radius: 16px;
+  padding: 12px;
+  display: grid;
+  gap: 2px;
+}
+.amounts-totals dt {
+  font-size: 0.75rem;
+  color: #5e5878;
+}
+.amounts-totals dd {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #2b2350;
+  overflow-wrap: anywhere;
+}
+.amounts-totals dd.amounts-count {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: #5e5878;
+}
+.amounts-recent {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.amounts-recent li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0ecf8;
+}
+.amounts-recent li > span {
+  display: grid;
+  min-width: 0;
+}
+.amounts-recent small {
+  color: #5e5878;
+  font-size: 0.75rem;
+}
+.amounts-recent li > strong {
+  white-space: nowrap;
+}
+.history-month-title,
+.history-day h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.history-month-title span,
+.history-day h3 span {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #5b21b6;
+  white-space: nowrap;
+}
+@media (max-width: 420px) {
+  .top-actions .demo-label {
+    display: none;
+  }
+}
+.bottom-nav {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.bottom-nav .nav-item {
+  padding: 7px 8px;
+  min-width: 0;
 }

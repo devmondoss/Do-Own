@@ -26,6 +26,7 @@ import {
   IconTile,
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
+import { AmountsSummary, totalsText } from "./amounts-summary";
 import { getEvidence } from "@/lib/evidence-store";
 import {
   categoryLabels,
@@ -200,6 +201,8 @@ export function HistoryScreen() {
         action={<Badge tone="neutral">{all.length} registros</Badge>}
       />
 
+      <AmountsSummary decisions={all} />
+
       {insights.length > 0 && (
         <Card className="insights-card">
           <IconTile icon={Lightbulb} tone="amber" />
@@ -276,10 +279,16 @@ export function HistoryScreen() {
       ) : (
         [...groups.entries()].map(([month, days]) => (
           <section key={month} className="history-month">
-            <h2 className="history-month-title">{monthName(month)}</h2>
+            <h2 className="history-month-title">
+              {monthName(month)}
+              <span>{totalsText([...days.values()].flat())}</span>
+            </h2>
             {[...days.entries()].map(([day, items]) => (
               <div key={day} className="history-day">
-                <h3>{dayTitle(items[0].createdAt)}</h3>
+                <h3>
+                  {dayTitle(items[0].createdAt)}
+                  <span>{totalsText(items)}</span>
+                </h3>
                 {items.map((r) => (
                   <Card key={r.id} className="history-item">
                     <div className="history-item-main">
