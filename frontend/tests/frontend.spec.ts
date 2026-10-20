@@ -67,10 +67,18 @@ test("twelve routes render without JavaScript errors or horizontal overflow", as
   expect(errors).toEqual([]);
 });
 
-test("welcome needs no financial data and uses the optional name", async ({
+test("welcome needs no financial data but does require a name", async ({
   page,
 }) => {
   await page.goto("/");
+  await expect(page).toHaveURL(/\/bienvenida$/);
+  await page.getByRole("button", { name: "Comenzar mi recorrido" }).click();
+  await expect(page).toHaveURL(/\/bienvenida$/);
+  await expect(page.locator("#welcome-name-error")).toContainText(
+    "Escribe tu nombre",
+  );
+  await page.getByLabel(/Cómo te llamamos/).fill("   ");
+  await page.getByRole("button", { name: "Comenzar mi recorrido" }).click();
   await expect(page).toHaveURL(/\/bienvenida$/);
   await page.getByLabel(/Cómo te llamamos/).fill("Rodrigo");
   await page.getByRole("button", { name: "Comenzar mi recorrido" }).click();

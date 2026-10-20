@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -21,21 +21,39 @@ export function WelcomeScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
-  const { startDemo } = useDemo();
+  const [nameError, setNameError] = useState("");
+  const { startDemo, data, live, hydrated } = useDemo();
   const { enabled, ensureAccount } = useWallet();
   const router = useRouter();
+  const alreadySetUp =
+    live && hydrated && data.onboardingComplete && !!data.profile.name.trim();
+  useEffect(() => {
+    if (alreadySetUp) router.replace("/inicio");
+  }, [alreadySetUp, router]);
   function start(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const cleanName = name.trim();
     const cleanEmail = email.trim();
-    if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
-      setEmailError(
-        "Revisa tu correo (por ejemplo, ana@correo.com) o déjalo vacío.",
-      );
+    const nameBad = cleanName.length < 2;
+    const emailBad =
+      !!cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail);
+    setNameError(
+      nameBad ? "Escribe tu nombre (al menos 2 letras) para comenzar." : "",
+    );
+    setEmailError(
+      emailBad
+        ? "Revisa tu correo (por ejemplo, ana@correo.com) o déjalo vacío."
+        : "",
+    );
+    if (nameBad || emailBad) {
+      document
+        .getElementById(nameBad ? "welcome-name" : "welcome-email")
+        ?.focus();
       return;
     }
     handleCrearPerfil();
     // DEMO(UI): no real account or authentication is created.
-    startDemo(name, cleanEmail || undefined);
+    startDemo(cleanName, cleanEmail || undefined);
     // Creates the device key and the sponsored account in the background,
     // so the first reward can be delivered without waiting here.
     if (enabled) void ensureAccount();
@@ -92,17 +110,27 @@ export function WelcomeScreen() {
             </div>
           </div>
           <form onSubmit={start} noValidate>
-            <label htmlFor="welcome-name">
-              ¿Cómo te llamamos? <span>(opcional)</span>
-            </label>
+            <label htmlFor="welcome-name">¿Cómo te llamamos?</label>
             <input
               id="welcome-name"
               autoComplete="given-name"
               maxLength={40}
+              required
+              aria-required="true"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ana"
+              onChange={(e) => {
+                setName(e.target.value);
+                if (nameError) setNameError("");
+              }}
+              placeholder="Tu nombre"
+              aria-invalid={!!nameError}
+              aria-describedby={nameError ? "welcome-name-error" : undefined}
             />
+            {nameError && (
+              <p className="field-error" role="alert" id="welcome-name-error">
+                {nameError}
+              </p>
+            )}
             <label htmlFor="welcome-email">
               Tu correo <span>(opcional)</span>
             </label>

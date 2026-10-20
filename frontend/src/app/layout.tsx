@@ -5,6 +5,7 @@ import { DemoProvider } from "@/providers/demo-provider";
 import { WalletProvider } from "@/providers/wallet-provider";
 import { AvatarProvider } from "@/providers/avatar-provider";
 import { PwaRegister } from "@/components/ui/pwa-register";
+import { OnboardingGuard } from "@/components/ui/onboarding-guard";
 
 export const metadata: Metadata = {
   title: { default: "Do-Own · Tu progreso es tuyo", template: "%s · Do-Own" },
@@ -36,6 +37,7 @@ export default function RootLayout({
             !!process.env.STELLAR_ASSET_ISSUER
           }
         >
+          <OnboardingGuard />
           <WalletProvider>
             <AvatarProvider>{children}</AvatarProvider>
           </WalletProvider>

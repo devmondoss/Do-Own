@@ -23,6 +23,8 @@ interface DemoContextValue {
   data: DemoSnapshot;
   /** true when the server has the Stellar wallet configured: real, persisted data. */
   live: boolean;
+  /** false until this device's saved data has been read (live mode). */
+  hydrated: boolean;
   startDemo: (name: string, email?: string) => void;
   saveDecision: (input: DecisionInput) => void;
   /** Attach, replace (file) or remove (null) the evidence photo of a record. */
@@ -152,13 +154,15 @@ export function DemoProvider({
         ...current,
         profile: {
           ...current.profile,
-          name: name.trim() || (live ? current.profile.name : "Ana"),
+          // The welcome form requires a name; keep the previous one only as
+          // a safety net so a profile never ends up without a name.
+          name: name.trim().slice(0, 40) || current.profile.name || "Ana",
           ...(email?.trim() ? { email: email.trim() } : {}),
         },
         onboardingComplete: true,
       }));
     },
-    [live],
+    [],
   );
 
   const saveDecision = useCallback((input: DecisionInput) => {
@@ -295,6 +299,7 @@ export function DemoProvider({
       value={{
         data,
         live,
+        hydrated,
         startDemo,
         saveDecision,
         setEvidence,
