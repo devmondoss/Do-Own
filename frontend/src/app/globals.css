@@ -4499,3 +4499,76 @@ button:disabled {
   align-items: center;
   gap: 6px;
 }
+.claim-dialog .transfer-summary dd {
+  text-align: right;
+}
+.claim-note {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.claim-note svg {
+  flex: none;
+  margin-top: 2px;
+}
+.currency-switch {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.currency-switch label {
+  position: relative;
+  flex: 1;
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid #ddd6f3;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4b4565;
+  cursor: pointer;
+}
+.currency-switch label.is-selected {
+  background: #efe9ff;
+  border-color: #7c3aed;
+  color: #5b21b6;
+}
+.currency-switch input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+.currency-switch label:focus-within {
+  outline: 2px solid #6d4aff;
+  outline-offset: 2px;
+}
+@media (min-width: 1024px) {
+  .home-grid > .quick-links {
+    grid-column: span 4;
+    grid-template-columns: 1fr;
+    align-content: start;
+    margin-top: 36px;
+  }
+  .home-grid > .quick-links .quick-link {
+    display: flex;
+    justify-items: start;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+  .home-grid > .wellness-card {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .home-grid > .wellness-card > div {
+    flex: 1;
+  }
+}
+.item-card .field-error {
+  margin-top: 8px;
+}

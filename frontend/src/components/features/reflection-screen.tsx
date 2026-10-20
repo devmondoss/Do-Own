@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { decisionDate, recentDecisions } from "@/lib/decision-summary";
-import { emotionLabels } from "@/lib/labels";
+import { emotionLabels, formatMoney } from "@/lib/labels";
 
 const categories = [
   { id: "antojo", label: "Antojo", tone: "violet" as const },
@@ -75,20 +75,30 @@ export function ReflectionScreen() {
               const grouped = records.filter(
                 (record) => record.category === category.id,
               );
-              const cents = grouped.reduce(
-                (sum, record) => sum + Math.round(Number(record.amount) * 100),
-                0,
-              );
+              // Totals per currency: pesos and dollars are never mixed.
+              const totals = (["MXN", "USD"] as const)
+                .map((currency) => ({
+                  currency,
+                  cents: grouped
+                    .filter((r) => (r.currency ?? "MXN") === currency)
+                    .reduce(
+                      (sum, r) => sum + Math.round(Number(r.amount) * 100),
+                      0,
+                    ),
+                }))
+                .filter((t, i) => i === 0 || t.cents > 0);
               return (
                 <div key={category.id}>
                   <Badge tone={category.tone}>{category.label}</Badge>
-                  <strong>
-                    {new Intl.NumberFormat("es-MX", {
-                      style: "currency",
-                      currency: "MXN",
-                    }).format(cents / 100)}{" "}
-                    <small>MXN</small>
-                  </strong>
+                  {totals.map((t) => (
+                    <strong key={t.currency}>
+                      {formatMoney(t.cents / 100, t.currency).replace(
+                        ` ${t.currency}`,
+                        "",
+                      )}{" "}
+                      <small>{t.currency}</small>
+                    </strong>
+                  ))}
                   <span>
                     {grouped.length}{" "}
                     {grouped.length === 1 ? "registro" : "registros"}
@@ -158,13 +168,7 @@ export function ReflectionScreen() {
                     {dateLabel(record.createdAt)}
                   </time>
                 </div>
-                <h3>
-                  {new Intl.NumberFormat("es-MX", {
-                    style: "currency",
-                    currency: "MXN",
-                  }).format(Number(record.amount))}{" "}
-                  MXN
-                </h3>
+                <h3>{formatMoney(record.amount, record.currency ?? "MXN")}</h3>
                 <p>{record.note || "Sin nota adicional"}</p>
                 <footer>
                   <span>

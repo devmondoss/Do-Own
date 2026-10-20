@@ -2,7 +2,7 @@
  * Never cache /api, third-party requests, RSC payloads or financial information.
  * Bump VERSION on asset/layout releases; old caches are deleted on activation.
  */
-const VERSION = "do-own-v7";
+const VERSION = "do-own-v8";
 const STATIC = `${VERSION}-static`;
 const PAGES = `${VERSION}-pages`;
 const PRELOAD = [

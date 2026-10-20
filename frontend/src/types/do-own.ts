@@ -1,5 +1,6 @@
 export type DecisionCategory = "antojo" | "habitual" | "ahorro";
 export type Emotion = "alegria" | "tranquilo" | "estres" | "triste" | "rutina";
+export type Currency = "MXN" | "USD";
 export type DailyAction = "decision" | "emotion" | "lesson";
 
 // TODO(BACKEND): agree on API DTOs with the backend team before connecting.
@@ -8,7 +9,7 @@ export interface DecisionInput {
   /** Qué compró (Product Definition F01). Optional only for older records. */
   item?: string;
   amount: string;
-  currency: "MXN";
+  currency: Currency;
   category: DecisionCategory;
   emotion: Emotion;
   note: string;
