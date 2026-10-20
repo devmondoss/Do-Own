@@ -11,6 +11,7 @@ import {
   Flame,
   Gift,
   Heart,
+  History,
   LockKeyhole,
   Smile,
   Sparkles,
@@ -185,6 +186,20 @@ export function HomeScreen() {
             })}
           </Card>
         </section>
+        <nav className="quick-links" aria-label="Tu espacio">
+          <Link href="/historial" className="quick-link">
+            <IconTile icon={History} tone="violet" />
+            <span>Mi historial</span>
+          </Link>
+          <Link href="/constancia" className="quick-link">
+            <IconTile icon={Flame} tone="amber" />
+            <span>Mi constancia</span>
+          </Link>
+          <Link href="/mis-recompensas" className="quick-link">
+            <IconTile icon={Gift} tone="mint" />
+            <span>Mis recompensas</span>
+          </Link>
+        </nav>
         <Card className="wellness-card">
           <IconTile icon={Smile} tone="mint" />
           <div>

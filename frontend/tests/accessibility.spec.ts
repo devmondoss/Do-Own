@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-test("nine screens have no detected WCAG A/AA violations on mobile and desktop", async ({
+test("twelve screens have no detected WCAG A/AA violations on mobile and desktop", async ({
   page,
 }) => {
   test.setTimeout(120000);
@@ -17,6 +17,9 @@ test("nine screens have no detected WCAG A/AA violations on mobile and desktop",
       "registro",
       "recompensa",
       "comprobante",
+      "historial",
+      "constancia",
+      "mis-recompensas",
     ]) {
       await page.goto(`/${route}`);
       const results = await new AxeBuilder({ page })

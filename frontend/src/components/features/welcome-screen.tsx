@@ -19,14 +19,23 @@ import { useWallet } from "@/providers/wallet-provider";
 
 export function WelcomeScreen() {
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const { startDemo } = useDemo();
   const { enabled, ensureAccount } = useWallet();
   const router = useRouter();
   function start(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const cleanEmail = email.trim();
+    if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
+      setEmailError(
+        "Revisa tu correo (por ejemplo, ana@correo.com) o déjalo vacío.",
+      );
+      return;
+    }
     handleCrearPerfil();
     // DEMO(UI): no real account or authentication is created.
-    startDemo(name);
+    startDemo(name, cleanEmail || undefined);
     // Creates the device key and the sponsored account in the background,
     // so the first reward can be delivered without waiting here.
     if (enabled) void ensureAccount();
@@ -82,7 +91,7 @@ export function WelcomeScreen() {
               </p>
             </div>
           </div>
-          <form onSubmit={start}>
+          <form onSubmit={start} noValidate>
             <label htmlFor="welcome-name">
               ¿Cómo te llamamos? <span>(opcional)</span>
             </label>
@@ -94,6 +103,33 @@ export function WelcomeScreen() {
               onChange={(e) => setName(e.target.value)}
               placeholder="Ana"
             />
+            <label htmlFor="welcome-email">
+              Tu correo <span>(opcional)</span>
+            </label>
+            <input
+              id="welcome-email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              maxLength={80}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+              }}
+              placeholder="ana@correo.com"
+              aria-invalid={!!emailError}
+              aria-describedby="welcome-email-hint"
+            />
+            {emailError ? (
+              <p className="field-error" role="alert" id="welcome-email-hint">
+                {emailError}
+              </p>
+            ) : (
+              <span className="field-hint" id="welcome-email-hint">
+                Solo se guarda en este dispositivo. No te enviaremos nada.
+              </span>
+            )}
             <Button type="submit" className="full-width">
               Comenzar mi recorrido
               <ArrowRight size={18} />

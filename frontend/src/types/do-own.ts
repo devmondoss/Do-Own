@@ -1,10 +1,12 @@
 export type DecisionCategory = "antojo" | "habitual" | "ahorro";
-export type Emotion = "tranquilo" | "estres" | "rutina";
+export type Emotion = "alegria" | "tranquilo" | "estres" | "triste" | "rutina";
 export type DailyAction = "decision" | "emotion" | "lesson";
 
 // TODO(BACKEND): agree on API DTOs with the backend team before connecting.
 // Keep amounts as decimal strings at the integration boundary (no float money).
 export interface DecisionInput {
+  /** Qué compró (Product Definition F01). Optional only for older records. */
+  item?: string;
   amount: string;
   currency: "MXN";
   category: DecisionCategory;
@@ -21,9 +23,13 @@ export interface DecisionRecord extends Omit<DecisionInput, "attachment"> {
 
 export interface DemoReward {
   id: string;
-  reason: "registro" | "aprendizaje";
+  reason: "registro" | "aprendizaje" | "semanal" | "mensual";
   units: number;
   status: "available" | "claimed";
+  createdAt?: string;
+  claimedAt?: string;
+  /** Human description, e.g. "Semana del 13 oct al 19 oct". */
+  label?: string;
 }
 
 export interface TransferInput {
@@ -37,11 +43,13 @@ export interface DemoTransfer extends TransferInput {
 }
 
 export interface DemoSnapshot {
-  profile: { name: string; level: number };
+  profile: { name: string; level: number; email?: string };
   balanceUnits: number;
   streakDays: number;
   completedActions: DailyAction[];
   lessonCompleted: boolean;
+  /** Lesson ids completed at least once (e.g. "antojo-v1"). */
+  lessonsCompleted?: string[];
   onboardingComplete: boolean;
   decisions: DecisionRecord[];
   rewards: DemoReward[];

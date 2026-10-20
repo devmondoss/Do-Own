@@ -142,7 +142,29 @@ function rewardMemo(publicKey: string, rewardId: string) {
     .digest();
 }
 
-const REWARD_ID = /^(record-[0-9a-f-]{36}|lesson-[a-z0-9-]{1,40})$/;
+const REWARD_ID =
+  /^(record-[0-9a-f-]{36}|lesson-[a-z0-9-]{1,40}|week-\d{4}-W\d{2}|month-\d{4}-\d{2})$/;
+
+/** Amount per reward type (Product Definition F06). Must match lib/periods.ts. */
+export function rewardAmount(rewardId: string) {
+  if (rewardId.startsWith("week-")) return "3";
+  if (rewardId.startsWith("month-")) return "10";
+  return REWARD_AMOUNT;
+}
+
+/** Period bonuses cannot be claimed for a week or month that has not started. */
+function periodStarted(rewardId: string) {
+  const now = new Date();
+  if (rewardId.startsWith("month-"))
+    return rewardId.slice(6) <= now.toISOString().slice(0, 7);
+  if (rewardId.startsWith("week-")) {
+    const [year, week] = rewardId.slice(5).split("-W").map(Number);
+    const jan4 = Date.UTC(year, 0, 4);
+    const monday = jan4 - ((new Date(jan4).getUTCDay() + 6) % 7) * 86400000;
+    return monday + (week - 1) * 7 * 86400000 <= now.getTime();
+  }
+  return true;
+}
 const MAX_REWARDS_PER_DAY = 12;
 
 /**
@@ -155,6 +177,9 @@ export async function sendReward(publicKey: string, rewardId: unknown) {
   const { sponsor, asset } = requireEnv();
   if (typeof rewardId !== "string" || !REWARD_ID.test(rewardId))
     throw new StellarApiError("Recompensa inválida.");
+  if (!periodStarted(rewardId))
+    throw new StellarApiError("Ese periodo todavía no empieza.");
+  const amount = rewardAmount(rewardId);
   const account = await loadAccount(publicKey);
   if (!account || !hasTrustline(account, asset))
     throw new StellarApiError("La cuenta aún no está lista.", 409);
@@ -171,7 +196,7 @@ export async function sendReward(publicKey: string, rewardId: unknown) {
     (t) => t.memo_type === "hash" && t.memo === memoB64,
   );
   if (duplicate)
-    return receipt(duplicate.hash, "confirmed", asset, duplicate.created_at);
+    return receipt(duplicate.hash, asset, duplicate.created_at, amount);
   const today = new Date().toISOString().slice(0, 10);
   const todayRewards = page.records.filter(
     (t) =>
@@ -194,7 +219,7 @@ export async function sendReward(publicKey: string, rewardId: unknown) {
       Operation.payment({
         destination: publicKey,
         asset,
-        amount: REWARD_AMOUNT,
+        amount,
       }),
     )
     .addMemo(Memo.hash(memo))
@@ -202,18 +227,18 @@ export async function sendReward(publicKey: string, rewardId: unknown) {
     .build();
   tx.sign(sponsor);
   const result = await submit(tx);
-  return receipt(result.hash, "confirmed", asset, new Date().toISOString());
+  return receipt(result.hash, asset, new Date().toISOString(), amount);
 }
 
 function receipt(
   hash: string,
-  status: "confirmed",
   asset: Asset,
   createdAt: string,
+  amount: string,
 ) {
   return {
-    status,
-    amount: REWARD_AMOUNT,
+    status: "confirmed" as const,
+    amount,
     asset: { code: REWARD_ASSET_CODE, issuer: asset.getIssuer() ?? "" },
     transactionHash: hash,
     explorerUrl: explorerTx(hash),
