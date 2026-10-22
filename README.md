@@ -138,6 +138,8 @@ La app incluye una wallet integrada y no custodial: la llave se genera en el dis
 
 Do-Own es una PWA: se puede instalar desde el navegador ("Agregar a pantalla de inicio") o como app de Android.
 
+**Guía para quien prueba la app:** [docs/semana5/InstalarApp.md](docs/semana5/InstalarApp.md) (también en [PDF](docs/semana5/Instala-Do-Own.pdf)).
+
 - **Descargar la app (.apk):** https://do-own-six.vercel.app/Do-Own.apk. También está el botón **Descargar app para Android** en la pantalla *Mi cuenta*. Para publicar una versión nueva, se reemplaza `frontend/public/Do-Own.apk`.
 - **Generar el instalador (.apk):** abrir el [reporte de PWABuilder](https://pwabuilder.com/reportcard?site=https://do-own-six.vercel.app), presionar **Package for stores**, luego **Android** y luego **Generate**. Se descarga un .zip con el `.apk` (para instalar directo en el teléfono) y el `.aab` (para Google Play próxima etapa).
 - **Instalar en el teléfono:** pasar el `.apk` al teléfono, abrirlo y permitir "instalar apps de origen desconocido" cuando Android lo pida.
