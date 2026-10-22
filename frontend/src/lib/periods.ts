@@ -37,8 +37,14 @@ export function isoWeekId(key: string) {
 export const weekMonth = (weekMonday: string) =>
   addDays(weekMonday, 3).slice(0, 7);
 
+/** Repeated operations (F01) never count for constancy or rewards. */
+export const validDecisions = (decisions: DecisionRecord[]) =>
+  decisions.filter((d) => !d.duplicate);
+
 export function recordedDays(decisions: DecisionRecord[]) {
-  return new Set(decisions.map((d) => decisionDate(d.createdAt)));
+  return new Set(
+    validDecisions(decisions).map((d) => decisionDate(d.createdAt)),
+  );
 }
 
 const MONTHS = [
@@ -90,7 +96,7 @@ export function weekStatus(
   today = todayKey(),
 ): WeekStatus {
   const sunday = addDays(monday, 6);
-  const inWeek = decisions.filter((d) => {
+  const inWeek = validDecisions(decisions).filter((d) => {
     const k = decisionDate(d.createdAt);
     return k >= monday && k <= sunday;
   });

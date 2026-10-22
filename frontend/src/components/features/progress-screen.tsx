@@ -31,6 +31,7 @@ import { formatDown, useWallet } from "@/providers/wallet-provider";
 import { decisionWeekday, recentDecisions } from "@/lib/decision-summary";
 import { lessons } from "@/data/mock-data";
 import { AmountsSummary } from "./amounts-summary";
+import { ConstancySummary } from "./constancy-summary";
 
 export function ProgressScreen() {
   const { data, live } = useDemo();
@@ -138,6 +139,7 @@ export function ProgressScreen() {
           aria-labelledby="tab-history"
           className="progress-content"
         >
+          <ConstancySummary />
           <AmountsSummary decisions={data.decisions} latest={5} />
           <Card className="streak-card">
             <div className="streak-title">

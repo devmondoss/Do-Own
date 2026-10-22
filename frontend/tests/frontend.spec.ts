@@ -24,9 +24,15 @@ async function claimReward(page: Page) {
   await expect(dialog).toBeHidden();
 }
 
-async function completeLesson(page: Page) {
+async function completeLesson(page: Page, repeat = false) {
+  // The featured lesson is the recommended one; a finished lesson is
+  // repeated from "Más lecciones".
   await page
-    .getByRole("button", { name: /Comenzar lección|Repasar lección/ })
+    .getByRole("button", {
+      name: repeat
+        ? "Repasar: ¿Qué es un Antojo?"
+        : /Comenzar lección|Repasar lección/,
+    })
     .click();
   const dialog = page.getByRole("dialog", { name: "Microlección de Antojos" });
   await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
@@ -45,6 +51,11 @@ async function completeLesson(page: Page) {
   await expect(finish).toBeDisabled();
   await dialog.getByRole("button", { name: /Para ver con el tiempo/ }).click();
   await finish.click();
+  // F04: closing summary with the quiz result and today's progress.
+  await expect(dialog).toContainText(/completad[oa]!/);
+  await expect(dialog).toContainText("al primer intento");
+  await expect(dialog).toContainText("Tu avance de hoy");
+  await dialog.getByRole("button", { name: "Cerrar", exact: true }).click();
   await expect(dialog).not.toBeVisible();
 }
 
@@ -82,6 +93,9 @@ test("welcome needs no financial data but does require a name", async ({
   await expect(page).toHaveURL(/\/bienvenida$/);
   await page.getByLabel(/Cómo te llamamos/).fill("Rodrigo");
   await page.getByRole("button", { name: "Comenzar mi recorrido" }).click();
+  // F01: the first stop after the welcome is registering a purchase.
+  await expect(page).toHaveURL(/\/registro$/);
+  await page.getByRole("link", { name: "Volver" }).click();
   await expect(page).toHaveURL(/\/inicio$/);
   await expect(page.locator("main")).toContainText("Rodrigo");
 });
@@ -160,9 +174,13 @@ test("a lesson earns an additional reward, while repeating it earns none", async
   await expect(page.locator(".balance-number")).toHaveText("127créditos");
   await page
     .getByRole("navigation", { name: "Navegación principal" })
-    .getByRole("link", { name: "Aprender" })
+    .getByRole("link", { name: "Aprende" })
     .click();
-  await completeLesson(page);
+  // After finishing Antojos, the recommendation moves to a lesson not done yet.
+  await expect(page.locator(".featured-lesson h2")).not.toHaveText(
+    "¿Qué es un Antojo?",
+  );
+  await completeLesson(page, true);
   await page.getByRole("link", { name: /Ver mi recompensa →/ }).click();
   await expect(
     page.getByRole("button", { name: "Recibir mi recompensa" }),
@@ -316,7 +334,7 @@ test("history, constancy and rewards explain the person's own records", async ({
 
   await page
     .getByRole("navigation", { name: "Navegación principal" })
-    .getByRole("link", { name: "Recompensas" })
+    .getByRole("link", { name: "Mi progreso" })
     .click();
   await page.getByRole("link", { name: /Ver mi constancia/ }).click();
   await page.getByRole("tab", { name: "Mes" }).click();
@@ -399,4 +417,31 @@ test("all registered amounts stay visible, and the balance is always at hand", a
   await expect(page.locator(".balance-chip")).toContainText("créditos");
   await page.locator(".balance-chip").click();
   await expect(page).toHaveURL(/\/mis-recompensas$/);
+});
+
+test("the same purchase is kept in the history but rewarded only once", async ({
+  page,
+}) => {
+  async function register() {
+    await page.getByLabel(/qué compraste/i).fill("Café");
+    await page
+      .getByLabel("Agregar foto de tu decisión")
+      .setInputFiles("public/icons/icon-192.png");
+    await page.getByLabel("Monto en pesos mexicanos").fill("45");
+    await page.getByRole("button", { name: "Guardar decisión" }).click();
+  }
+  await page.goto("/registro");
+  await register();
+  await expect(page).toHaveURL(/\/recompensa$/);
+  // Demo mode keeps state in memory: move with links, never reload.
+  await page.getByRole("link", { name: "Volver a mi progreso" }).click();
+  await page
+    .getByRole("navigation", { name: "Navegación principal" })
+    .getByRole("link", { name: "Registro" })
+    .click();
+  await register();
+  await expect(page).toHaveURL(/\/historial$/);
+  await expect(
+    page.locator(".history-item").filter({ hasText: "Sin recompensa" }),
+  ).toContainText("Esta foto ya se usó");
 });

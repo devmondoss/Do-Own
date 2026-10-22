@@ -302,6 +302,11 @@ export function HistoryScreen() {
                           {emotionLabels[r.emotion]} · {time(r.createdAt)}
                         </span>
                         {r.note && <p>{r.note}</p>}
+                        {r.duplicate && (
+                          <p className="duplicate-note">
+                            Sin recompensa: {r.duplicateReason}
+                          </p>
+                        )}
                       </div>
                       <strong className="history-amount">
                         {formatMoney(r.amount, r.currency)}

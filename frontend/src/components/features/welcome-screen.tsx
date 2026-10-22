@@ -25,8 +25,15 @@ export function WelcomeScreen() {
   const { startDemo, data, live, hydrated } = useDemo();
   const { enabled, ensureAccount } = useWallet();
   const router = useRouter();
+  // Set when this form is submitted, so the "already set up" redirect to
+  // Inicio does not override the first stop (Registro) right after it.
+  const [submitted, setSubmitted] = useState(false);
   const alreadySetUp =
-    live && hydrated && data.onboardingComplete && !!data.profile.name.trim();
+    !submitted &&
+    live &&
+    hydrated &&
+    data.onboardingComplete &&
+    !!data.profile.name.trim();
   useEffect(() => {
     if (alreadySetUp) router.replace("/inicio");
   }, [alreadySetUp, router]);
@@ -51,13 +58,15 @@ export function WelcomeScreen() {
         ?.focus();
       return;
     }
+    setSubmitted(true);
     handleCrearPerfil();
     // DEMO(UI): no real account or authentication is created.
     startDemo(cleanName, cleanEmail || undefined);
     // Creates the device key and the sponsored account in the background,
     // so the first reward can be delivered without waiting here.
     if (enabled) void ensureAccount();
-    router.push("/inicio");
+    // F01: after creating the profile, go straight to registering a purchase.
+    router.push("/registro");
   }
   return (
     <main id="contenido" className="welcome-page">

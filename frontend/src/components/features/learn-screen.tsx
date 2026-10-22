@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
 import { lessons } from "@/data/mock-data";
+import { categoryLabels } from "@/lib/labels";
+import { validDecisions } from "@/lib/periods";
 import { handleCompletarLeccion } from "@/lib/integrations";
 
 export function LearnScreen() {
@@ -43,6 +45,13 @@ export function LearnScreen() {
   const totalSteps = lessonSteps.length + lessonQuestions.length;
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>([null, null]);
+  // First answer per question, to report "correct on the first try".
+  const [firstTry, setFirstTry] = useState<(boolean | null)[]>([null, null]);
+  const [summary, setSummary] = useState<{
+    firstTryCorrect: number;
+    total: number;
+    repeat: boolean;
+  } | null>(null);
   const questionIndex = step - lessonSteps.length;
   const question = lessonQuestions[questionIndex];
   const answer = answers[questionIndex];
@@ -50,10 +59,25 @@ export function LearnScreen() {
   const isDone = (id: string) =>
     !!data.lessonsCompleted?.includes(id) ||
     (id === "antojo-v1" && data.lessonCompleted);
+
+  // F04: recommend the lesson about the kind of decision registered most.
+  const counts = new Map<string, number>();
+  validDecisions(data.decisions).forEach((d) =>
+    counts.set(d.category, (counts.get(d.category) ?? 0) + 1),
+  );
+  const ranked = [...lessons].sort(
+    (a, b) => (counts.get(b.category) ?? 0) - (counts.get(a.category) ?? 0),
+  );
+  const featured = ranked.find((l) => !isDone(l.id)) ?? ranked[0];
+  const featuredCount = counts.get(featured.category) ?? 0;
+  const totalRecords = validDecisions(data.decisions).length;
+  const others = lessons.filter((l) => l.id !== featured.id);
   function openLesson(id = lessons[0].id) {
     setActiveId(id);
     setStep(0);
     setAnswers([null, null]);
+    setFirstTry([null, null]);
+    setSummary(null);
     dialog.current?.showModal();
   }
   function finishLesson() {
@@ -62,7 +86,11 @@ export function LearnScreen() {
     // TODO(BACKEND): validate all answers before awarding the real completion.
     const repeat = isDone(lesson.id);
     completeLesson(lesson.id);
-    dialog.current?.close();
+    setSummary({
+      firstTryCorrect: firstTry.filter(Boolean).length,
+      total: lessonQuestions.length,
+      repeat,
+    });
     notify(
       repeat
         ? "Repaso completado. Sigue observando a tu ritmo."
@@ -72,7 +100,7 @@ export function LearnScreen() {
   return (
     <main id="contenido" className="page learn-page">
       <FlowHeader
-        title="Aprender"
+        title="Aprende"
         action={
           <Badge tone="amber">
             <Flame size={16} />
@@ -102,17 +130,14 @@ export function LearnScreen() {
         <div className="lesson-meta">
           <Badge>
             <Sparkles size={14} />
-            {data.lessonCompleted
+            {isDone(featured.id)
               ? "Microaprendizaje completado"
               : "Aprendizaje aplicado · +25 pts"}
           </Badge>
-          <Badge tone="neutral">Nivel 1</Badge>
+          <Badge tone="neutral">Recomendada para ti</Badge>
         </div>
-        <h2>¿Qué es un Antojo?</h2>
-        <p>
-          Una decisión del momento, sin juicios. Descubre para qué sirve
-          observarla y registrarla con honestidad.
-        </p>
+        <h2>{featured.title}</h2>
+        <p>{featured.summary}</p>
         <div className="lesson-perks">
           <div>
             <IconTile icon={Clock3} />
@@ -127,21 +152,15 @@ export function LearnScreen() {
             <span>Conecta el aprendizaje con tu registro</span>
           </div>
         </div>
-        {data.decisions.some(
-          (record) =>
-            record.category === "antojo" && !record.id.startsWith("sample-"),
-        ) && (
+        {featuredCount > 0 && (
           <p className="lesson-context">
-            Elegiste Antojo en uno de tus registros de esta sesión. Esta lección
-            se relaciona con esa decisión.
+            Te la recomendamos porque {featuredCount} de tus {totalRecords}{" "}
+            registros son “{categoryLabels[featured.category]}”.
           </p>
         )}
-        <Button
-          className="full-width"
-          onClick={() => openLesson(lessons[0].id)}
-        >
-          {data.lessonCompleted ? "Repasar lección" : "Comenzar lección"}
-          {data.lessonCompleted ? <Check size={18} /> : <Play size={17} />}
+        <Button className="full-width" onClick={() => openLesson(featured.id)}>
+          {isDone(featured.id) ? "Repasar lección" : "Comenzar lección"}
+          {isDone(featured.id) ? <Check size={18} /> : <Play size={17} />}
         </Button>
       </Card>
       <section className="upcoming-section">
@@ -156,7 +175,7 @@ export function LearnScreen() {
           Más lecciones
         </SectionHeading>
         <div className="upcoming-lessons">
-          {lessons.slice(1).map((l) => (
+          {others.map((l) => (
             <article key={l.id} className="upcoming-card lesson-available">
               <IconTile
                 icon={l.category === "ahorro" ? Wallet : Brain}
@@ -206,93 +225,153 @@ export function LearnScreen() {
             <X size={20} />
           </button>
         </div>
-        <ProgressBar
-          value={((step + 1) / totalSteps) * 100}
-          label="Avance de la microlección"
-        />
-        <span className="lesson-step-count">
-          PASO {step + 1} DE {totalSteps}
-        </span>
-        {step < lessonSteps.length ? (
-          <>
-            <IconTile icon={Lightbulb} />
-            <h2>{lessonSteps[step].title}</h2>
-            <p>{lessonSteps[step].text}</p>
-            <div className="lesson-highlight">
-              <Sparkles size={20} />
-              <strong>{lessonSteps[step].highlight}</strong>
-            </div>
+        {summary ? (
+          <div className="lesson-summary">
+            <IconTile icon={CheckCircle2} tone="mint" />
+            <h2>
+              {summary.repeat ? "¡Repaso completado!" : "¡Lección completada!"}
+            </h2>
+            <p>Lo que te llevas de “{lesson.title}”:</p>
+            <ul>
+              {lessonSteps.map((s) => (
+                <li key={s.title}>{s.highlight}</li>
+              ))}
+            </ul>
+            <dl className="transfer-summary">
+              <div>
+                <dt>Cuestionario</dt>
+                <dd>
+                  {summary.total} de {summary.total} correctas ·{" "}
+                  {summary.firstTryCorrect} al primer intento
+                </dd>
+              </div>
+              <div>
+                <dt>Tu avance de hoy</dt>
+                <dd>{data.completedActions.length} de 3 acciones</dd>
+              </div>
+              <div>
+                <dt>Recompensa</dt>
+                <dd>
+                  {summary.repeat
+                    ? "Ya la recibiste antes: repasar no suma otra"
+                    : "1 disponible para recibir"}
+                </dd>
+              </div>
+            </dl>
             <div className="lesson-dialog-actions">
-              {step > 0 && (
-                <Button variant="quiet" onClick={() => setStep(step - 1)}>
-                  <ArrowLeft size={17} />
-                  Atrás
-                </Button>
-              )}
-              <Button onClick={() => setStep(step + 1)}>
-                Continuar
-                <ArrowRight size={17} />
+              <Button variant="quiet" onClick={() => dialog.current?.close()}>
+                Cerrar
               </Button>
+              {!summary.repeat && (
+                <Link className="button button-primary" href="/recompensa">
+                  Ver mi recompensa
+                  <ArrowRight size={17} />
+                </Link>
+              )}
             </div>
-          </>
+          </div>
         ) : (
           <>
-            <IconTile icon={Brain} tone="mint" />
-            <h2>
-              Pregunta {questionIndex + 1} de {lessonQuestions.length}
-            </h2>
-            <p>{question.title}</p>
-            <div className="quiz-options quiz-answers">
-              {question.options.map((option, index) => (
-                <button
-                  key={option}
-                  aria-pressed={answer === index}
-                  onClick={() =>
-                    setAnswers((current) =>
-                      current.map((value, i) =>
-                        i === questionIndex ? index : value,
-                      ),
-                    )
-                  }
-                  className={answer === index ? "quiz-selected" : ""}
-                >
-                  <span>
-                    {String.fromCharCode(97 + index)}) {option}
-                  </span>
-                  {answer === index && <Check size={17} />}
-                </button>
-              ))}
-            </div>
-            {answer !== null && (
-              <p
-                className={correct ? "quiz-correct" : "quiz-hint"}
-                role="status"
-              >
-                {correct ? lesson.correctFeedback : lesson.wrongFeedback}
-              </p>
+            <ProgressBar
+              value={((step + 1) / totalSteps) * 100}
+              label="Avance de la microlección"
+            />
+            <span className="lesson-step-count">
+              PASO {step + 1} DE {totalSteps}
+            </span>
+            {step < lessonSteps.length ? (
+              <>
+                <IconTile icon={Lightbulb} />
+                <h2>{lessonSteps[step].title}</h2>
+                <p>{lessonSteps[step].text}</p>
+                <div className="lesson-highlight">
+                  <Sparkles size={20} />
+                  <strong>{lessonSteps[step].highlight}</strong>
+                </div>
+                <div className="lesson-dialog-actions">
+                  {step > 0 && (
+                    <Button variant="quiet" onClick={() => setStep(step - 1)}>
+                      <ArrowLeft size={17} />
+                      Atrás
+                    </Button>
+                  )}
+                  <Button onClick={() => setStep(step + 1)}>
+                    Continuar
+                    <ArrowRight size={17} />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <IconTile icon={Brain} tone="mint" />
+                <h2>
+                  Pregunta {questionIndex + 1} de {lessonQuestions.length}
+                </h2>
+                <p>{question.title}</p>
+                <div className="quiz-options quiz-answers">
+                  {question.options.map((option, index) => (
+                    <button
+                      key={option}
+                      aria-pressed={answer === index}
+                      onClick={() => {
+                        setAnswers((current) =>
+                          current.map((value, i) =>
+                            i === questionIndex ? index : value,
+                          ),
+                        );
+                        setFirstTry((current) =>
+                          current.map((value, i) =>
+                            i === questionIndex && value === null
+                              ? index === question.correctIndex
+                              : value,
+                          ),
+                        );
+                      }}
+                      className={answer === index ? "quiz-selected" : ""}
+                    >
+                      <span>
+                        {String.fromCharCode(97 + index)}) {option}
+                      </span>
+                      {answer === index && <Check size={17} />}
+                    </button>
+                  ))}
+                </div>
+                {answer !== null && (
+                  <p
+                    className={correct ? "quiz-correct" : "quiz-hint"}
+                    role="status"
+                  >
+                    {correct ? lesson.correctFeedback : lesson.wrongFeedback}
+                  </p>
+                )}
+                <div className="lesson-dialog-actions">
+                  <Button variant="quiet" onClick={() => setStep(step - 1)}>
+                    <ArrowLeft size={17} />
+                    Atrás
+                  </Button>
+                  {questionIndex === 0 ? (
+                    <Button
+                      disabled={!correct}
+                      onClick={() => setStep(step + 1)}
+                    >
+                      Siguiente pregunta
+                      <ArrowRight size={17} />
+                    </Button>
+                  ) : (
+                    <Button
+                      disabled={
+                        !correct ||
+                        answers[0] !== lessonQuestions[0].correctIndex
+                      }
+                      onClick={finishLesson}
+                    >
+                      Completar microlección
+                      <CheckCircle2 size={18} />
+                    </Button>
+                  )}
+                </div>
+              </>
             )}
-            <div className="lesson-dialog-actions">
-              <Button variant="quiet" onClick={() => setStep(step - 1)}>
-                <ArrowLeft size={17} />
-                Atrás
-              </Button>
-              {questionIndex === 0 ? (
-                <Button disabled={!correct} onClick={() => setStep(step + 1)}>
-                  Siguiente pregunta
-                  <ArrowRight size={17} />
-                </Button>
-              ) : (
-                <Button
-                  disabled={
-                    !correct || answers[0] !== lessonQuestions[0].correctIndex
-                  }
-                  onClick={finishLesson}
-                >
-                  Completar microlección
-                  <CheckCircle2 size={18} />
-                </Button>
-              )}
-            </div>
           </>
         )}
       </dialog>

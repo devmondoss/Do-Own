@@ -14,12 +14,17 @@ export interface DecisionInput {
   emotion: Emotion;
   note: string;
   attachment?: File;
+  /** SHA-256 of the evidence photo, to detect reused photos (F01). */
+  photoHash?: string;
 }
 
 export interface DecisionRecord extends Omit<DecisionInput, "attachment"> {
   id: string;
   createdAt: string;
   photoAttached: boolean;
+  /** Repeated operation: kept in the history but it earns nothing (F01). */
+  duplicate?: boolean;
+  duplicateReason?: string;
 }
 
 export interface DemoReward {
