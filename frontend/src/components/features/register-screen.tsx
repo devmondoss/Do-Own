@@ -23,6 +23,7 @@ import {
   cn,
 } from "@/components/ui/primitives";
 import { useDemo } from "@/providers/demo-provider";
+import { photoFingerprint } from "@/lib/duplicates";
 import {
   deleteEvidence,
   getEvidence,
@@ -136,7 +137,7 @@ export function RegisterScreen() {
     void saveEvidence(DRAFT_PHOTO, file);
     handleAnalizarFoto(file);
   }
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const itemMissing = !item.trim();
     const photoMissing = !photo;
@@ -176,15 +177,24 @@ export function RegisterScreen() {
       ...(photo ? { attachment: photo } : {}),
     };
     handleGuardarDecision(input);
+    // F01: fingerprint of the photo so the same ticket cannot be rewarded twice.
+    const photoHash = photo ? await photoFingerprint(photo) : undefined;
     // DEMO(UI): mark steps in memory, never claim these were saved on a server.
     // TODO(BACKEND): await success, handle errors/loading and only then navigate.
-    saveDecision(input);
+    const result = saveDecision({ ...input, photoHash });
     try {
       window.localStorage.removeItem(DRAFT_KEY);
     } catch {
       /* ignore */
     }
     void deleteEvidence(DRAFT_PHOTO);
+    if (!result.rewarded) {
+      notify(
+        `Registro guardado en tu historial, sin recompensa: ${result.reason}`,
+      );
+      router.push("/historial");
+      return;
+    }
     notify(
       live
         ? "Decisión registrada. Tienes una recompensa disponible."
@@ -259,8 +269,12 @@ export function RegisterScreen() {
             )}
             <p className="field-hint">
               {photo
-                ? "Foto lista. Confirma el monto y la categoría manualmente: la lectura automática aún no está conectada."
+                ? "✓ Evidencia adjuntada correctamente. Se guarda solo en este teléfono."
                 : "Obligatoria: foto de tu compra o ticket (JPG, PNG o WebP, hasta 10 MB). Se guarda solo en este teléfono."}
+            </p>
+            <p className="field-hint privacy-hint">
+              Si tu ticket muestra tu nombre, dirección o números de tarjeta,
+              tápalos antes de tomar la foto.
             </p>
           </section>
           <section className="item-card">
@@ -369,7 +383,7 @@ export function RegisterScreen() {
           </div>
         </fieldset>
         <fieldset id="emocion" className="selection-fieldset emotion-fieldset">
-          <legend>¿Cómo te sientes al respecto?</legend>
+          <legend>¿Cómo te sientes con este gasto?</legend>
           <div className="selection-grid">
             {emotions.map(({ value, title, subtitle, emoji }) => (
               <label

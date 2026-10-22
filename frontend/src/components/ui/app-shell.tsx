@@ -11,7 +11,7 @@ import {
   CirclePlus,
   House,
   Sparkles,
-  Star,
+  TrendingUp,
   X,
   CalendarDays,
   Flame,
@@ -28,9 +28,9 @@ import { LogoutDialog } from "./logout-dialog";
 
 const destinations = [
   { href: "/inicio", label: "Inicio", icon: House },
-  { href: "/aprender", label: "Aprender", icon: BookOpen },
+  { href: "/aprender", label: "Aprende", icon: BookOpen },
   { href: "/registro", label: "Registro", icon: CirclePlus },
-  { href: "/progreso", label: "Recompensas", icon: Star },
+  { href: "/progreso", label: "Mi progreso", icon: TrendingUp },
 ];
 // Mobile: "Historial" is one tap away (all registered amounts).
 const mobileDestinations = [
@@ -41,7 +41,7 @@ const mobileDestinations = [
   destinations[3],
 ];
 
-// Pages reached from "Recompensas" on mobile keep that tab highlighted.
+// Pages reached from "Mi progreso" on mobile keep that tab highlighted.
 const SUB_PAGES = ["/cuenta", "/reflexion", "/constancia", "/mis-recompensas"];
 
 export function BottomNavigation({ desktop = false }: { desktop?: boolean }) {

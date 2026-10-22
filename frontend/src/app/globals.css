@@ -4688,3 +4688,59 @@ button:disabled {
   padding: 7px 8px;
   min-width: 0;
 }
+.duplicate-note {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--amber-ink, #8a4b00);
+}
+.lesson-summary {
+  display: grid;
+  gap: 12px;
+}
+.lesson-summary ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--text-muted, #5e5878);
+}
+.privacy-hint {
+  margin-top: 6px;
+}
+.constancy-summary {
+  display: grid;
+  gap: 14px;
+}
+.constancy-periods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.constancy-periods > div {
+  background: #fff7e8;
+  border-radius: 16px;
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.constancy-periods dt {
+  font-size: 0.75rem;
+  color: #5e5878;
+}
+.constancy-periods dd {
+  margin: 0;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #2b2350;
+}
+.constancy-periods dd.constancy-bar {
+  margin-top: 4px;
+}
+@media (max-width: 420px) {
+  .constancy-periods {
+    grid-template-columns: 1fr;
+  }
+}

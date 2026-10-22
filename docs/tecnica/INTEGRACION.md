@@ -9,7 +9,7 @@ Todas las rutas de archivo de esta guía son relativas a `frontend/`. Los comand
 | Bienvenida          | `src/components/features/welcome-screen.tsx`    | `handleCrearPerfil`, nombre opcional en memoria.                                   |
 | Inicio              | `src/components/features/home-screen.tsx`       | Perfil, racha y acciones obtenidos del provider.                                   |
 | Registro            | `src/components/features/register-screen.tsx`   | `handleAnalizarFoto`, `handleGuardarDecision`.                                     |
-| Aprender            | `src/components/features/learn-screen.tsx`      | `handleCompletarLeccion`; contenido en `src/data/mock-data.ts`.                    |
+| Aprende             | `src/components/features/learn-screen.tsx`      | `handleCompletarLeccion`; contenido en `src/data/mock-data.ts`.                    |
 | Recompensa          | `src/components/features/reward-screen.tsx`     | `handleReclamar(rewardId)`.                                                        |
 | Progreso            | `src/components/features/progress-screen.tsx`   | Saldo, actividad y acciones del provider.                                          |
 | Cuenta y envío      | `src/components/features/account-screen.tsx`    | `handleTransferirRecompensa(input)`.                                               |

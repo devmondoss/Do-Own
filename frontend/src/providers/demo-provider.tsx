@@ -13,6 +13,7 @@ import { CheckCircle2, X } from "lucide-react";
 import { initialDemo } from "@/data/mock-data";
 import { computeStreak, earnedPeriodRewards, todayKey } from "@/lib/periods";
 import { deleteEvidence, saveEvidence } from "@/lib/evidence-store";
+import { duplicateReason } from "@/lib/duplicates";
 import type {
   DecisionInput,
   DemoSnapshot,
@@ -26,7 +27,11 @@ interface DemoContextValue {
   /** false until this device's saved data has been read (live mode). */
   hydrated: boolean;
   startDemo: (name: string, email?: string) => void;
-  saveDecision: (input: DecisionInput) => void;
+  /** Saves the record; a repeated operation is kept but earns no reward. */
+  saveDecision: (input: DecisionInput) => {
+    rewarded: boolean;
+    reason?: string;
+  };
   /** Attach, replace (file) or remove (null) the evidence photo of a record. */
   setEvidence: (recordId: string, file: File | null) => Promise<void>;
   completeLesson: (lessonId?: string) => void;
@@ -148,59 +153,64 @@ export function DemoProvider({
     }));
   }, [hydrated, state.decisions, state.rewards]);
 
-  const startDemo = useCallback(
-    (name: string, email?: string) => {
-      setData((current) => ({
-        ...current,
-        profile: {
-          ...current.profile,
-          // The welcome form requires a name; keep the previous one only as
-          // a safety net so a profile never ends up without a name.
-          name: name.trim().slice(0, 40) || current.profile.name || "Ana",
-          ...(email?.trim() ? { email: email.trim() } : {}),
-        },
-        onboardingComplete: true,
-      }));
-    },
-    [],
-  );
-
-  const saveDecision = useCallback((input: DecisionInput) => {
-    const id = crypto.randomUUID();
-    const { attachment, ...privateFields } = input;
-    // F02: the photo stays on this device (IndexedDB), never uploaded.
-    if (attachment) void saveEvidence(id, attachment);
-    // DEMO(UI): one reward per decision; this does not indicate API success.
+  const startDemo = useCallback((name: string, email?: string) => {
     setData((current) => ({
       ...current,
-      completedActions: Array.from(
-        new Set([
-          ...current.completedActions,
-          "decision" as const,
-          "emotion" as const,
-        ]),
-      ),
-      decisions: [
-        {
-          ...privateFields,
-          id,
-          createdAt: new Date().toISOString(),
-          photoAttached: !!attachment,
-        },
-        ...current.decisions,
-      ],
-      rewards: [
-        ...current.rewards,
-        {
-          id: `record-${id}`,
-          reason: "registro",
-          units: 1,
-          status: "available",
-          createdAt: new Date().toISOString(),
-        },
-      ],
+      profile: {
+        ...current.profile,
+        // The welcome form requires a name; keep the previous one only as
+        // a safety net so a profile never ends up without a name.
+        name: name.trim().slice(0, 40) || current.profile.name || "Ana",
+        ...(email?.trim() ? { email: email.trim() } : {}),
+      },
+      onboardingComplete: true,
     }));
   }, []);
+
+  const saveDecision = useCallback(
+    (input: DecisionInput) => {
+      const id = crypto.randomUUID();
+      const { attachment, ...privateFields } = input;
+      const reason = duplicateReason(state.decisions, input);
+      // F02: the photo stays on this device (IndexedDB), never uploaded.
+      if (attachment) void saveEvidence(id, attachment);
+      // DEMO(UI): one reward per decision; this does not indicate API success.
+      setData((current) => ({
+        ...current,
+        completedActions: Array.from(
+          new Set([
+            ...current.completedActions,
+            "decision" as const,
+            "emotion" as const,
+          ]),
+        ),
+        decisions: [
+          {
+            ...privateFields,
+            id,
+            createdAt: new Date().toISOString(),
+            photoAttached: !!attachment,
+            ...(reason ? { duplicate: true, duplicateReason: reason } : {}),
+          },
+          ...current.decisions,
+        ],
+        rewards: reason
+          ? current.rewards
+          : [
+              ...current.rewards,
+              {
+                id: `record-${id}`,
+                reason: "registro",
+                units: 1,
+                status: "available",
+                createdAt: new Date().toISOString(),
+              },
+            ],
+      }));
+      return reason ? { rewarded: false, reason } : { rewarded: true };
+    },
+    [state.decisions],
+  );
 
   const setEvidence = useCallback(
     async (recordId: string, file: File | null) => {
